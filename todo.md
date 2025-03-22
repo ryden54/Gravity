@@ -6,13 +6,13 @@
     * [x] Installer Python 3.x et les bibliothèques nécessaires : `pygame`, `numpy`, `scipy`, `json`
     * [x] Créer un environnement virtuel
     * [x] Configurer Git
-* [ ] Création du modèle de données
-    * [ ] Définir la structure de données pour les planètes
-    * [ ] Créer la fonction de lecture du fichier JSON
-    * [ ] Initialiser les positions et vitesses des planètes
-* [ ] Tests unitaires
-    * [ ] Vérifier la lecture du fichier JSON
-    * [ ] Vérifier l'initialisation des données
+* [x] Création du modèle de données
+    * [x] Définir la structure de données pour les planètes
+    * [x] Créer la fonction de lecture du fichier JSON
+    * [x] Initialiser les positions et vitesses des planètes
+* [x] Tests unitaires
+    * [x] Vérifier la lecture du fichier JSON
+    * [x] Vérifier l'initialisation des données
 
 ## Phase 2 : Implémentation de la simulation 2D (Itérations 2-4)
 
