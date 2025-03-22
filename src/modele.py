@@ -1,6 +1,7 @@
 import json
 import numpy as np
-from dataclasses import dataclass
+import uuid
+from dataclasses import dataclass, field
 from typing import List, Tuple, Dict, Any, Optional
 
 
@@ -15,6 +16,7 @@ class CorpsCeleste:
     vitesse: np.ndarray
     couleur: Tuple[int, int, int]
     trajectoire: Optional[List[np.ndarray]] = None
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
     
     def __post_init__(self):
         """Convertit les listes en tableaux numpy si nécessaire et initialise la trajectoire."""
@@ -24,6 +26,27 @@ class CorpsCeleste:
             self.vitesse = np.array(self.vitesse, dtype=float)
         if self.trajectoire is None:
             self.trajectoire = [self.position.copy()]
+
+    def __eq__(self, autre: object) -> bool:
+        """Vérifie si deux corps célestes sont égaux.
+        
+        Args:
+            autre (object): Autre objet à comparer
+            
+        Returns:
+            bool: True si les corps sont égaux, False sinon
+        """
+        if not isinstance(autre, CorpsCeleste):
+            return False
+        return self.id == autre.id
+    
+    def __hash__(self) -> int:
+        """Calcule le hash du corps céleste.
+        
+        Returns:
+            int: Hash basé sur l'ID unique du corps
+        """
+        return hash(self.id)
 
 
 class SystemeSolaire:

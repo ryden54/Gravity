@@ -8,8 +8,9 @@ Simulation du système solaire - Script principal
 import os
 import sys
 import time
-from modele import SystemeSolaire
-from simulation import Simulation
+from src.modele import SystemeSolaire
+from src.simulation import Simulation
+from src.visualisation import Visualisation
 
 
 def main():
@@ -20,29 +21,41 @@ def main():
     # Création de la simulation avec un pas de temps d'une heure
     simulation = Simulation(systeme, dt=3600.0)
     
+    # Création de la visualisation
+    visu = Visualisation()
+    
     # Durée de simulation (1 jour)
     duree_simulation = 24 * 3600.0  # 24 heures en secondes
     
     print("Démarrage de la simulation...")
-    print("Appuyez sur Ctrl+C pour arrêter la simulation")
+    print("Appuyez sur Échap pour quitter")
     temps_debut = time.time()
     
     # Boucle principale de simulation
     try:
         while True:
+            # Gestion des événements Pygame
+            if not visu.gerer_evenements():
+                break
+            
             # Fait avancer la simulation d'une journée
             simulation.simuler(duree_simulation)
             
             # Affiche l'état actuel
             temps_ecoule = simulation.obtenir_temps()
             jours = temps_ecoule / (24 * 3600.0)
-            print(f"Temps écoulé : {jours:.1f} jours")
+            print(f"Temps écoulé : {jours:.1f} jours", end='\r')
             
-            # Petit délai pour ne pas surcharger le CPU
-            time.sleep(0.1)
+            # Met à jour l'affichage
+            visu.dessiner_systeme(systeme)
+            
+            # Limite le framerate à 60 FPS
+            time.sleep(1/60)
             
     except KeyboardInterrupt:
         print("\nSimulation arrêtée par l'utilisateur")
+    finally:
+        visu.fermer()
     
     temps_fin = time.time()
     duree_reelle = temps_fin - temps_debut

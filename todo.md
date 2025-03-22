@@ -28,11 +28,11 @@
     * [x] Calculer les forces de gravité à chaque itération
     * [x] Mettre à jour les positions et vitesses des planètes
     * [x] Tests : vérifier la cohérence des évolutions
-* [ ] Affichage 2D
-    * [ ] Afficher les planètes avec `pygame`
-    * [ ] Afficher les trajectoires passées
-    * [ ] Afficher les noms des planètes
-    * [ ] Tests visuels : vérifier l'affichage et les trajectoires
+* [x] Affichage 2D
+    * [x] Afficher les planètes avec `pygame`
+    * [x] Afficher les trajectoires passées
+    * [x] Afficher les noms des planètes
+    * [x] Tests visuels : vérifier l'affichage et les trajectoires
 
 ## Phase 3 : Ajout de la 3D (Itérations 5-7)
 
