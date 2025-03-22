@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 from datetime import datetime, timedelta
 from typing import Tuple, Dict, List
-from modele import SystemeSolaire, CorpsCeleste
+from src.modele import SystemeSolaire, CorpsCeleste
 
 
 class Visualisation:
@@ -27,6 +27,8 @@ class Visualisation:
         self.marge = 50  # Marge en pixels pour éviter que les planètes touchent les bords
         self.date_debut = datetime.now()  # Date de début de la simulation (date actuelle)
         self.en_pause = False  # État de pause de la simulation
+        self.echelle_courante = None  # Échelle actuelle pour l'affichage
+        self._dernier_systeme = None  # Dernier système affiché
         
         # Couleurs
         self.NOIR = (0, 0, 0)
@@ -42,43 +44,37 @@ class Visualisation:
         Returns:
             float: Échelle en pixels/mètre
         """
-        # Trouve les positions extrêmes actuelles
-        x_min = y_min = float('inf')
-        x_max = y_max = float('-inf')
+        # Réinitialise l'échelle courante si c'est un nouveau système
+        if not hasattr(self, '_dernier_systeme') or self._dernier_systeme != systeme:
+            self._dernier_systeme = systeme
+            self.echelle_courante = None
         
-        # Prend en compte toutes les planètes
+        # Si le système est vide, retourne une échelle par défaut
+        if not systeme.etoiles and not systeme.planetes:
+            return 1e-10
+        
+        # Trouve la distance maximale entre les corps
+        distance_max = 0.0
         for corps in systeme.obtenir_tous_corps():
-            x, y = corps.position[0], corps.position[1]
-            x_min = min(x_min, x)
-            x_max = max(x_max, x)
-            y_min = min(y_min, y)
-            y_max = max(y_max, y)
+            distance = np.linalg.norm(corps.position)
+            distance_max = max(distance_max, distance)
         
-        # Ajoute une marge de sécurité de 20% pour éviter que les planètes touchent les bords
-        marge_x = (x_max - x_min) * 0.2
-        marge_y = (y_max - y_min) * 0.2
-        x_min -= marge_x
-        x_max += marge_x
-        y_min -= marge_y
-        y_max += marge_y
+        # Si aucune distance n'est trouvée, retourne une échelle par défaut
+        if distance_max == 0.0:
+            return 1e-10
         
-        # Calcule les dimensions nécessaires
-        largeur_necessaire = x_max - x_min
-        hauteur_necessaire = y_max - y_min
+        # Calcule l'échelle pour que le système tienne dans la fenêtre
+        # avec une marge de 20%
+        marge = 0.2
+        echelle = (min(self.largeur, self.hauteur) * (1 - 2 * marge)) / (2 * distance_max)
         
-        # Zone d'affichage disponible (en tenant compte de la marge)
-        largeur_disponible = self.largeur - 2 * self.marge
-        hauteur_disponible = self.hauteur - 2 * self.marge
-        
-        # Calcule l'échelle pour chaque dimension en tenant compte des marges
-        echelle_x = largeur_disponible / largeur_necessaire if largeur_necessaire > 0 else 1e-10
-        echelle_y = hauteur_disponible / hauteur_necessaire if hauteur_necessaire > 0 else 1e-10
-        
-        # Utilise l'échelle la plus petite pour conserver les proportions
-        nouvelle_echelle = min(echelle_x, echelle_y)
+        # Ajuste l'échelle pour qu'elle soit dans une plage raisonnable
+        echelle_min = 1e-12
+        echelle_max = 1e-8
+        nouvelle_echelle = max(min(echelle, echelle_max), echelle_min)
         
         # Si c'est la première fois qu'on calcule l'échelle
-        if not hasattr(self, 'echelle_courante'):
+        if self.echelle_courante is None:
             self.echelle_courante = nouvelle_echelle
             return nouvelle_echelle
         
@@ -102,13 +98,12 @@ class Visualisation:
         elif nouvelle_echelle > self.echelle_courante * 2:
             # Vérifie si tous les corps sont dans la moitié centrale de la zone d'affichage
             tous_proches = True
-            zone_centrale_x = largeur_disponible / 4  # 25% de la largeur de chaque côté
-            zone_centrale_y = hauteur_disponible / 4  # 25% de la hauteur de chaque côté
+            zone_centrale = min(self.largeur, self.hauteur) * 0.25  # 25% de la plus petite dimension
             
             for corps in systeme.obtenir_tous_corps():
                 x = corps.position[0] * self.echelle_courante
                 y = corps.position[1] * self.echelle_courante
-                if (abs(x) > zone_centrale_x or abs(y) > zone_centrale_y):
+                if (abs(x) > zone_centrale or abs(y) > zone_centrale):
                     tous_proches = False
                     break
             

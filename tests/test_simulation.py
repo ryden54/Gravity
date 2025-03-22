@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from src.modele import SystemeSolaire, CorpsCeleste
 from src.simulation import Simulation
+from src.modele import SystemeSolaire, CorpsCeleste
 
 
 class TestSimulation(unittest.TestCase):
