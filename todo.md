@@ -1,0 +1,69 @@
+# To-Do : Simulation du système solaire
+
+## Phase 1 : Mise en place de l'environnement et du modèle de données (Itération 1)
+
+* [x] Configuration de l'environnement de développement
+    * [x] Installer Python 3.x et les bibliothèques nécessaires : `pygame`, `numpy`, `scipy`, `json`
+    * [x] Créer un environnement virtuel
+    * [x] Configurer Git
+* [ ] Création du modèle de données
+    * [ ] Définir la structure de données pour les planètes
+    * [ ] Créer la fonction de lecture du fichier JSON
+    * [ ] Initialiser les positions et vitesses des planètes
+* [ ] Tests unitaires
+    * [ ] Vérifier la lecture du fichier JSON
+    * [ ] Vérifier l'initialisation des données
+
+## Phase 2 : Implémentation de la simulation 2D (Itérations 2-4)
+
+* [ ] Calcul de la gravité
+    * [ ] Implémenter la fonction `calculer_gravite(planete1, planete2)`
+    * [ ] Tests unitaires : vérifier la précision des calculs
+* [ ] Calcul des trajectoires
+    * [ ] Implémenter la fonction `calculer_trajectoire(planete, force, dt)`
+    * [ ] Tests unitaires : vérifier la précision des calculs
+* [ ] Boucle temporelle et mise à jour des positions
+    * [ ] Créer la boucle principale de simulation
+    * [ ] Calculer les forces de gravité à chaque itération
+    * [ ] Mettre à jour les positions et vitesses des planètes
+    * [ ] Tests : vérifier la cohérence des évolutions
+* [ ] Affichage 2D
+    * [ ] Afficher les planètes avec `pygame`
+    * [ ] Afficher les trajectoires passées
+    * [ ] Afficher les noms des planètes
+    * [ ] Tests visuels : vérifier l'affichage et les trajectoires
+
+## Phase 3 : Ajout de la 3D (Itérations 5-7)
+
+* [ ] Adaptation du modèle de données pour la 3D
+    * [ ] Modifier la structure de données pour inclure la coordonnée Z
+    * [ ] Adapter la fonction de lecture du fichier JSON
+    * [ ] Tests unitaires : vérifier la lecture et l'initialisation des données 3D
+* [ ] Calcul de la gravité et des trajectoires en 3D
+    * [ ] Adapter les fonctions `calculer_gravite` et `calculer_trajectoire` pour la 3D
+    * [ ] Tests unitaires : vérifier la précision des calculs 3D
+* [ ] Affichage 3D avec PyOpenGL
+    * [ ] Configurer PyOpenGL pour la scène 3D
+    * [ ] Afficher les planètes sous forme de sphères
+    * [ ] Implémenter les contrôles de la caméra (clavier)
+    * [ ] Ajouter une grille 3D
+    * [ ] Tests visuels : vérifier l'affichage et les contrôles
+
+## Phase 4 : Finalisation et tests (Itérations 8-9)
+
+* [ ] Gestion des modes 2D/3D
+    * [ ] Ajouter l'argument `--mode` en ligne de commande
+    * [ ] Adapter le code pour les modes 2D et 3D
+    * [ ] Tests : vérifier le fonctionnement des deux modes
+* [ ] Tests et documentation
+    * [ ] Effectuer des tests complets
+    * [ ] Rédiger la documentation du code et du projet
+
+## Phase 5 : Développement futur (Itération 10+)
+
+* [ ] Ajout de fonctionnalités avancées
+    * [ ] Implémenter des modèles de gravité complexes
+    * [ ] Ajouter des textures réalistes pour les planètes
+    * [ ] Ajouter des effets de lumière et d'ombre
+    * [ ] Ajouter une interface graphique pour personnaliser la simulation
+    * [ ] Optimiser les performances pour un grand nombre de corps célestes
