@@ -10,9 +10,9 @@ import sys
 import time
 import argparse
 import pygame
-from src.modele import SystemeSolaire
-from src.simulation import Simulation
-from src.visualisation import Visualisation
+from modele import SystemeSolaire
+from simulation import Simulation
+from visualisation import Visualisation
 
 
 def main():
@@ -21,13 +21,15 @@ def main():
     parser = argparse.ArgumentParser(description="Simulation du système solaire")
     parser.add_argument("--dt", type=float, default=24.0,
                       help="Unité de temps de la simulation en heures (défaut: 24.0)")
+    parser.add_argument("--fichier", type=str, default="../data/planets.json",
+                      help="Chemin du fichier JSON contenant les données du système solaire")
     args = parser.parse_args()
     
     # Conversion des heures en secondes
     dt = args.dt * 3600.0
     
     # Chargement du système solaire
-    systeme = SystemeSolaire("data/planets.json")
+    systeme = SystemeSolaire.depuis_json(args.fichier)
     
     # Vérification du chargement des corps célestes
     if not systeme.etoiles:

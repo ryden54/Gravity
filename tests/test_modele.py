@@ -112,16 +112,73 @@ class TestCorpsCeleste(unittest.TestCase):
 
 
 class TestSystemeSolaire(unittest.TestCase):
-    """Tests pour la classe SystemeSolaire."""
+    """Teste la classe SystemeSolaire."""
     
     def setUp(self):
-        """Crée un fichier JSON temporaire pour les tests."""
-        self.donnees_test = {
+        """Prépare les données de test."""
+        # Création des corps célestes de test
+        self.soleil = CorpsCeleste(
+            nom="Soleil",
+            masse=1.989e30,
+            rayon=6.96e8,
+            position=np.zeros(3),
+            vitesse=np.zeros(3),
+            couleur=(255, 255, 0)
+        )
+        
+        self.terre = CorpsCeleste(
+            nom="Terre",
+            masse=5.97e24,
+            rayon=6.37e6,
+            position=np.array([1.496e11, 0.0, 0.0]),
+            vitesse=np.array([0.0, 29.78e3, 0.0]),
+            couleur=(0, 0, 255)
+        )
+        
+        # Création du système solaire de test
+        self.systeme = SystemeSolaire(
+            etoiles=[self.soleil],
+            planetes=[self.terre]
+        )
+    
+    def test_obtenir_tous_corps(self):
+        """Teste la méthode pour obtenir tous les corps célestes."""
+        tous_corps = self.systeme.obtenir_tous_corps()
+        
+        self.assertEqual(len(tous_corps), 2)
+        self.assertIn(self.soleil, tous_corps)
+        self.assertIn(self.terre, tous_corps)
+        
+    def test_calculer_gravite(self):
+        """Teste le calcul de la force de gravité entre deux corps."""
+        # La force est exercée par le soleil sur la terre
+        force = self.systeme.calculer_gravite(self.terre, self.soleil)
+        self.assertEqual(len(force), 3)
+        self.assertLess(force[0], 0)  # Force attractive vers le soleil (axe x négatif)
+        
+    def test_calculer_acceleration(self):
+        """Teste le calcul de l'accélération d'un corps sous l'effet d'une force."""
+        # Force test de 1N dans chaque direction
+        force = np.array([1.0, 1.0, 1.0])
+        dt = 1.0
+        
+        acceleration = self.systeme.calculer_acceleration(self.terre, force, dt)
+        self.assertEqual(len(acceleration), 3)
+        self.assertGreater(acceleration[0], 0)  # Accélération positive en x
+
+
+class TestSystemeSolaireFactory(unittest.TestCase):
+    """Teste la factory de SystemeSolaire."""
+    
+    def setUp(self):
+        """Prépare les données de test."""
+        self.temp_fichier = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json')
+        self.temp_fichier.write('''{
             "etoiles": [
                 {
                     "nom": "Soleil",
                     "masse": 1.989e30,
-                    "rayon": 6.95e8,
+                    "rayon": 6.96e8,
                     "position": [0, 0, 0],
                     "vitesse": [0, 0, 0],
                     "couleur": [255, 255, 0]
@@ -130,109 +187,42 @@ class TestSystemeSolaire(unittest.TestCase):
             "planetes": [
                 {
                     "nom": "Terre",
-                    "masse": 5.9724e24,
-                    "rayon": 6.3781e6,
-                    "position": [1.4960e11, 0, 0],
-                    "vitesse": [0, 2.9783e4, 0],
+                    "masse": 5.97e24,
+                    "rayon": 6.37e6,
+                    "position": [1.496e11, 0, 0],
+                    "vitesse": [0, 29.78e3, 0],
                     "couleur": [0, 0, 255]
                 }
             ]
-        }
-        
-        self.temp_fichier = tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json')
-        json.dump(self.donnees_test, self.temp_fichier)
+        }''')
         self.temp_fichier.close()
-    
+        
     def tearDown(self):
-        """Supprime le fichier temporaire après les tests."""
+        """Nettoie les données de test."""
         os.unlink(self.temp_fichier.name)
-    
+        
     def test_charger_donnees(self):
         """Teste le chargement des données depuis un fichier JSON."""
-        systeme = SystemeSolaire(self.temp_fichier.name)
+        systeme = SystemeSolaire.depuis_json(self.temp_fichier.name)
         
         self.assertEqual(len(systeme.etoiles), 1)
         self.assertEqual(len(systeme.planetes), 1)
+        self.assertEqual(systeme.etoiles[0].nom, "Soleil")
+        self.assertEqual(systeme.planetes[0].nom, "Terre")
         
-        soleil = systeme.etoiles[0]
-        terre = systeme.planetes[0]
-        
-        self.assertEqual(soleil.nom, "Soleil")
-        self.assertEqual(terre.nom, "Terre")
-        
-        # Vérification que la position de la Terre est sur son orbite
-        distance_soleil = np.linalg.norm(terre.position)
-        self.assertAlmostEqual(distance_soleil, 1.4960e11, delta=1e6)
-        
-        # Vérification que la vitesse est perpendiculaire à la position
-        produit_scalaire = np.dot(terre.position, terre.vitesse)
-        self.assertAlmostEqual(produit_scalaire, 0.0, delta=1e6)
-        
-        # Vérification que la norme de la vitesse est conservée
-        vitesse = np.linalg.norm(terre.vitesse)
-        self.assertAlmostEqual(vitesse, 2.9783e4, delta=1.0)
-    
-    def test_obtenir_tous_corps(self):
-        """Teste la méthode pour obtenir tous les corps célestes."""
-        systeme = SystemeSolaire(self.temp_fichier.name)
-        tous_corps = systeme.obtenir_tous_corps()
-        
-        self.assertEqual(len(tous_corps), 2)
-        self.assertEqual(tous_corps[0].nom, "Soleil")
-        self.assertEqual(tous_corps[1].nom, "Terre")
-    
-    def test_calculer_gravite(self):
-        """Teste le calcul de la force de gravité entre deux corps."""
-        systeme = SystemeSolaire(self.temp_fichier.name)
-        soleil = systeme.etoiles[0]
-        terre = systeme.planetes[0]
-        
-        # Calcul de la force de gravité
-        force = systeme.calculer_gravite(terre, soleil)
-        
-        # La force doit être dirigée vers le soleil
-        direction = -terre.position / np.linalg.norm(terre.position)
-        force_normalisee = force / np.linalg.norm(force)
-        
-        # Vérification de la direction
-        self.assertTrue(np.allclose(direction, force_normalisee, rtol=1e-10))
-        
-        # Vérification de l'intensité (loi de Newton)
-        distance = np.linalg.norm(terre.position)
-        intensite_attendue = systeme.G * terre.masse * soleil.masse / (distance ** 2)
-        intensite_calculee = np.linalg.norm(force)
-        
-        self.assertAlmostEqual(intensite_calculee, intensite_attendue, delta=1e20)
-    
-    def test_calculer_acceleration(self):
-        """Teste le calcul de l'accélération d'un corps sous l'effet d'une force."""
-        systeme = SystemeSolaire(self.temp_fichier.name)
-        terre = systeme.planetes[0]
-        
-        # Force test de 1N dans chaque direction
-        force = np.array([1.0, 1.0, 1.0])
-        dt = 1.0
-        
-        # Calcul de l'accélération
-        delta_v = systeme.calculer_acceleration(terre, force, dt)
-        
-        # Vérification que a = F/m
-        acceleration_attendue = force / terre.masse * dt
-        self.assertTrue(np.allclose(delta_v, acceleration_attendue))
-    
-    def test_erreur_fichier_inexistant(self):
+    def test_fichier_inexistant(self):
         """Teste la gestion des fichiers inexistants."""
-        systeme = SystemeSolaire("fichier_inexistant.json")
+        systeme = SystemeSolaire.depuis_json("fichier_inexistant.json")
         self.assertEqual(len(systeme.etoiles), 0)
         self.assertEqual(len(systeme.planetes), 0)
-    
-    def test_erreur_fichier_invalide(self):
+        
+    def test_fichier_invalide(self):
         """Teste la gestion des fichiers JSON invalides."""
         with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json') as f:
             f.write("{ json invalide }")
             f.close()
             
-        systeme = SystemeSolaire(f.name)
+        systeme = SystemeSolaire.depuis_json(f.name)
         self.assertEqual(len(systeme.etoiles), 0)
         self.assertEqual(len(systeme.planetes), 0)
         

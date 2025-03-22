@@ -64,15 +64,32 @@ class SystemeSolaire:
     # Constante gravitationnelle en N⋅m²/kg²
     G = 6.67430e-11
     
-    def __init__(self, fichier_json: str):
-        """Initialise le système solaire à partir d'un fichier JSON.
+    def __init__(self, etoiles: List[CorpsCeleste] = None, planetes: List[CorpsCeleste] = None):
+        """Initialise le système solaire avec des étoiles et des planètes.
+        
+        Args:
+            etoiles (List[CorpsCeleste], optional): Liste des étoiles du système.
+            planetes (List[CorpsCeleste], optional): Liste des planètes du système.
+        """
+        self.etoiles = etoiles if etoiles is not None else []
+        self.planetes = planetes if planetes is not None else []
+    
+    @classmethod
+    def depuis_json(cls, fichier_json: str) -> 'SystemeSolaire':
+        """Crée un système solaire à partir d'un fichier JSON.
+        
+        Cette méthode est une factory qui charge les données depuis un fichier JSON
+        et crée une nouvelle instance de SystemeSolaire.
         
         Args:
             fichier_json (str): Chemin vers le fichier JSON contenant les données.
+            
+        Returns:
+            SystemeSolaire: Nouvelle instance du système solaire.
         """
-        self.etoiles: List[CorpsCeleste] = []
-        self.planetes: List[CorpsCeleste] = []
-        self.charger_donnees(fichier_json)
+        systeme = cls()
+        systeme.charger_donnees(fichier_json)
+        return systeme
     
     def charger_donnees(self, fichier_json: str) -> None:
         """Charge les données des corps célestes depuis un fichier JSON.
@@ -146,7 +163,7 @@ class SystemeSolaire:
         Returns:
             List[CorpsCeleste]: Liste de tous les corps célestes.
         """
-        return self.etoiles + self.planetes
+        return list(self.etoiles) + list(self.planetes)
     
     def calculer_gravite(self, corps1: CorpsCeleste, corps2: CorpsCeleste) -> np.ndarray:
         """Calcule la force de gravité exercée par corps2 sur corps1.

@@ -1,6 +1,6 @@
 from typing import List
 import numpy as np
-from src.modele import SystemeSolaire, CorpsCeleste
+from modele import SystemeSolaire, CorpsCeleste
 
 
 class Simulation:

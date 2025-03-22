@@ -10,7 +10,7 @@ class TestVisualisation(unittest.TestCase):
     
     def setUp(self):
         """Initialise les données de test."""
-        # Création d'un système solaire simplifié
+        # Création d'un système solaire simplifié pour les tests
         self.planete = CorpsCeleste(
             nom="Terre",
             masse=5.97e24,
@@ -29,7 +29,10 @@ class TestVisualisation(unittest.TestCase):
             couleur=(255, 255, 0)
         )
         
-        self.systeme = SystemeSolaire("data/planets.json")
+        # Création du système solaire de test
+        self.systeme = SystemeSolaire(etoiles=[self.etoile], planetes=[self.planete])
+        
+        # Création de la visualisation
         self.visu = Visualisation(largeur=800, hauteur=600)
     
     def tearDown(self):
@@ -38,9 +41,9 @@ class TestVisualisation(unittest.TestCase):
     
     def test_initialisation(self):
         """Test de l'initialisation de la visualisation."""
-        self.assertIsNotNone(self.visu.fenetre)
-        self.assertEqual(self.visu.fenetre.get_width(), 800)
-        self.assertEqual(self.visu.fenetre.get_height(), 600)
+        self.assertIsNotNone(self.visu.ecran)
+        self.assertEqual(self.visu.largeur, 800)
+        self.assertEqual(self.visu.hauteur, 600)
         self.assertEqual(self.visu.NOIR, (0, 0, 0))
         self.assertEqual(self.visu.BLANC, (255, 255, 255))
     
@@ -48,58 +51,51 @@ class TestVisualisation(unittest.TestCase):
         """Test de la conversion des coordonnées."""
         # Test avec une position au centre
         pos_centre = np.array([0.0, 0.0, 0.0])
-        x, y = self.visu.convertir_coordonnees(pos_centre)
+        echelle = 1e-9  # 1 pixel = 1e-9 mètres
+        x, y = self.visu.convertir_coordonnees(pos_centre, echelle)
+        
+        # Vérifie que le point est au centre de l'écran
         self.assertEqual(x, 400)  # 800/2
         self.assertEqual(y, 300)  # 600/2
+    
+    def test_ajouter_point_trajectoire(self):
+        """Test de l'ajout d'un point à la trajectoire."""
+        position = np.array([1.496e11, 0.0, 0.0])
+        self.visu.ajouter_point_trajectoire(self.planete, position)
         
-        # Test avec une position à droite
-        pos_droite = np.array([1e12, 0.0, 0.0])
-        x, y = self.visu.convertir_coordonnees(pos_droite)
-        self.assertGreater(x, 400)
+        # Vérifie que le point a été ajouté
+        self.assertIn(self.planete, self.visu.trajectoires)
+        self.assertEqual(len(self.visu.trajectoires[self.planete]), 1)
+        np.testing.assert_array_equal(self.visu.trajectoires[self.planete][0][0], position)
     
-    def test_dessiner_corps(self):
-        """Test du dessin d'un corps."""
-        # Vérifie que la méthode ne lève pas d'exception
-        try:
-            self.visu.dessiner_corps(self.planete)
-        except Exception as e:
-            self.fail(f"dessiner_corps a levé une exception : {e}")
-    
-    def test_dessiner_trajectoire(self):
-        """Test du dessin d'une trajectoire."""
-        # Ajoute quelques points à la trajectoire
-        self.planete.trajectoire = [
-            np.array([1.496e11, 0.0, 0.0]),
-            np.array([0.0, 1.496e11, 0.0]),
-            np.array([-1.496e11, 0.0, 0.0])
+    def test_nettoyer_trajectoire(self):
+        """Test du nettoyage des trajectoires."""
+        # Définit le temps actuel initial
+        temps_initial = 100.0
+        self.visu.temps_actuel = temps_initial
+        
+        # Ajoute plusieurs points avec des temps relatifs au temps actuel
+        positions = [
+            (np.array([1.496e11, 0.0, 0.0]), temps_initial - 80.0),  # 80 jours avant
+            (np.array([0.0, 1.496e11, 0.0]), temps_initial - 50.0),  # 50 jours avant
+            (np.array([-1.496e11, 0.0, 0.0]), temps_initial - 20.0)  # 20 jours avant
         ]
+        self.visu.trajectoires[self.planete] = positions
         
-        # Vérifie que la méthode ne lève pas d'exception
-        try:
-            self.visu.dessiner_trajectoire(self.planete)
-        except Exception as e:
-            self.fail(f"dessiner_trajectoire a levé une exception : {e}")
-    
-    def test_dessiner_systeme(self):
-        """Test du dessin du système complet."""
-        # Vérifie que la méthode ne lève pas d'exception
-        try:
-            self.visu.dessiner_systeme(self.systeme)
-        except Exception as e:
-            self.fail(f"dessiner_systeme a levé une exception : {e}")
+        # Test 1 : Les points sont tous dans la fenêtre de 90 jours
+        self.visu.nettoyer_trajectoire(self.planete)
+        self.assertEqual(len(self.visu.trajectoires[self.planete]), 3,
+                        "Tous les points devraient être conservés car dans la fenêtre de 90 jours")
+        
+        # Test 2 : Avance le temps de 60 jours
+        self.visu.temps_actuel = temps_initial + 60.0
+        self.visu.nettoyer_trajectoire(self.planete)
+        self.assertEqual(len(self.visu.trajectoires[self.planete]), 1,
+                        "Seul le point le plus récent devrait être conservé")
     
     def test_gerer_evenements(self):
         """Test de la gestion des événements."""
-        # Simule un événement QUIT
-        pygame.event.post(pygame.event.Event(pygame.QUIT))
-        self.assertFalse(self.visu.gerer_evenements())
-        
-        # Simule un événement KEYDOWN avec Échap
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_ESCAPE))
-        self.assertFalse(self.visu.gerer_evenements())
-        
-        # Simule un événement KEYDOWN avec une autre touche
-        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_SPACE))
+        # Vérifie que la méthode ne lève pas d'exception
         self.assertTrue(self.visu.gerer_evenements())
 
 

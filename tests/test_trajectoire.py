@@ -10,27 +10,30 @@ class TestTrajectoire(unittest.TestCase):
         """Initialise les données de test."""
         # Création d'une planète de test
         self.planete = CorpsCeleste(
-            nom="Test",
+            nom="Planete",
             masse=1e24,  # 1e24 kg
             rayon=1e6,   # 1000 km
-            position=np.array([0.0, 0.0, 0.0]),
-            vitesse=np.array([0.0, 0.0, 0.0]),
+            position=np.array([1e8, 0.0, 0.0]),  # 100 000 km à droite
+            vitesse=np.array([0.0, 1e3, 0.0]),  # 1 km/s vers le haut
             couleur=(255, 0, 0)
         )
         
-        self.systeme = SystemeSolaire("data/planets.json")
-    
-    def test_acceleration_force_nulle(self):
-        """Test que l'accélération est nulle sans force."""
-        force = np.zeros(3)
-        dt = 1.0  # 1 seconde
+        # Création d'une étoile de test
+        self.etoile = CorpsCeleste(
+            nom="Etoile",
+            masse=2e30,  # 2e30 kg (comme le Soleil)
+            rayon=1e8,   # 100 000 km
+            position=np.zeros(3),  # Au centre
+            vitesse=np.zeros(3),
+            couleur=(255, 255, 0)
+        )
         
-        delta_vitesse = self.systeme.calculer_acceleration(self.planete, force, dt)
-        np.testing.assert_array_almost_equal(delta_vitesse, np.zeros(3))
+        # Création du système solaire de test
+        self.systeme = SystemeSolaire(etoiles=[self.etoile], planetes=[self.planete])
     
     def test_acceleration_force_constante(self):
-        """Test que l'accélération est correcte sous une force constante."""
-        force = np.array([0.0, 1.0, 0.0])  # 1 N vers le haut
+        """Test que l'accélération est correcte sous l'effet d'une force constante."""
+        force = np.array([1e10, 0.0, 0.0])  # 10e10 N vers la droite
         dt = 1.0  # 1 seconde
         
         delta_vitesse = self.systeme.calculer_acceleration(self.planete, force, dt)
@@ -40,20 +43,20 @@ class TestTrajectoire(unittest.TestCase):
         delta_vitesse_attendue = acceleration * dt
         np.testing.assert_array_almost_equal(delta_vitesse, delta_vitesse_attendue)
     
+    def test_acceleration_force_nulle(self):
+        """Test que l'accélération est nulle sous l'effet d'une force nulle."""
+        force = np.zeros(3)
+        dt = 1.0  # 1 seconde
+        
+        delta_vitesse = self.systeme.calculer_acceleration(self.planete, force, dt)
+        
+        # Vérifie que la variation de vitesse est nulle
+        np.testing.assert_array_almost_equal(delta_vitesse, np.zeros(3))
+    
     def test_acceleration_gravite(self):
         """Test que l'accélération est correcte sous l'effet de la gravité."""
-        # Création d'une étoile de test
-        etoile = CorpsCeleste(
-            nom="Etoile",
-            masse=2e30,  # 2e30 kg (comme le Soleil)
-            rayon=1e8,   # 100 000 km
-            position=np.array([1e8, 0.0, 0.0]),  # 100 000 km à droite
-            vitesse=np.zeros(3),
-            couleur=(255, 255, 0)
-        )
-        
         # Calcul de la force de gravité
-        force = self.systeme.calculer_gravite(self.planete, etoile)
+        force = self.systeme.calculer_gravite(self.planete, self.etoile)
         dt = 1.0  # 1 seconde
         
         delta_vitesse = self.systeme.calculer_acceleration(self.planete, force, dt)
@@ -70,24 +73,22 @@ class TestTrajectoire(unittest.TestCase):
         self.planete.vitesse = vitesse
         
         position_initiale = self.planete.position.copy()
-        self.systeme.mettre_a_jour_position(self.planete, dt)
+        self.planete.mettre_a_jour_position(dt)
         
         # Vérifie que la position a été mise à jour correctement
         position_attendue = position_initiale + vitesse * dt
         np.testing.assert_array_almost_equal(self.planete.position, position_attendue)
-        
-        # Vérifie que la trajectoire contient la nouvelle position
-        self.assertEqual(len(self.planete.trajectoire), 2)
-        np.testing.assert_array_almost_equal(self.planete.trajectoire[-1], position_attendue)
     
     def test_mise_a_jour_position_vitesse_variable(self):
         """Test que la position est mise à jour correctement avec une vitesse variable."""
         dt = 1.0  # 1 seconde
-        vitesse = np.array([1.0, 2.0, 0.0])  # Vitesse en x et y
+        vitesse = np.array([1.0, 0.0, 0.0])  # 1 m/s vers la droite
         self.planete.vitesse = vitesse
         
         position_initiale = self.planete.position.copy()
-        self.systeme.mettre_a_jour_position(self.planete, dt)
+        
+        # Mise à jour de la position
+        self.planete.mettre_a_jour_position(dt)
         
         # Vérifie que la position a été mise à jour correctement
         position_attendue = position_initiale + vitesse * dt

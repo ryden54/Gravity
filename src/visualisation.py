@@ -2,7 +2,7 @@ import pygame
 import numpy as np
 from datetime import datetime, timedelta
 from typing import Tuple, Dict, List
-from src.modele import SystemeSolaire, CorpsCeleste
+from modele import SystemeSolaire, CorpsCeleste
 
 
 class Visualisation:
@@ -154,16 +154,11 @@ class Visualisation:
         if corps not in self.trajectoires:
             return
             
-        # Trouve l'index du premier point à conserver
-        index_debut = 0
-        for i, (_, temps) in enumerate(self.trajectoires[corps]):
-            if self.temps_actuel - temps <= self.duree_trajectoire:
-                index_debut = i
-                break
-        
-        # Supprime les points trop anciens
-        if index_debut > 0:
-            self.trajectoires[corps] = self.trajectoires[corps][index_debut:]
+        # Supprime les points plus anciens que duree_trajectoire jours
+        self.trajectoires[corps] = [
+            (pos, temps) for pos, temps in self.trajectoires[corps]
+            if self.temps_actuel - temps <= self.duree_trajectoire
+        ]
     
     def mettre_a_jour_temps(self, temps: float) -> None:
         """Met à jour le temps actuel.
