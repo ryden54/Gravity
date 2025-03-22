@@ -67,7 +67,7 @@ class TestMain(unittest.TestCase):
             main()
             
             # Vérifications
-            mock_systeme.depuis_json.assert_called_once_with(self.test_file)
+            mock_systeme.depuis_json.assert_called_once_with(self.test_file, randomSpeedRatio=0.1)
             mock_simulation.assert_called_once()
             mock_visu.assert_called_once()
 

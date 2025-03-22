@@ -36,6 +36,24 @@ class Visualisation:
         self.BLANC = (255, 255, 255)
         self.GRIS = (80, 80, 80)
     
+    def couleur_pastel(self, couleur: Tuple[int, int, int]) -> Tuple[int, int, int]:
+        """Convertit une couleur en sa version pastel.
+        
+        Args:
+            couleur (Tuple[int, int, int]): Couleur RGB à convertir
+            
+        Returns:
+            Tuple[int, int, int]: Version pastel de la couleur
+        """
+        # Pour créer une version pastel, on mélange la couleur avec du blanc
+        # et on réduit légèrement la saturation
+        r, g, b = couleur
+        return (
+            int((r + 255) / 2),  # Mélange avec du blanc
+            int((g + 255) / 2),
+            int((b + 255) / 2)
+        )
+    
     def calculer_echelle(self, systeme: SystemeSolaire) -> float:
         """Calcule l'échelle appropriée pour afficher tous les corps.
         
@@ -170,8 +188,8 @@ class Visualisation:
         Args:
             echelle (float): Échelle en pixels/mètre
         """
-        # Couleur de la grille (gris plus clair)
-        GRIS = (120, 120, 120)
+        # Couleur de la grille (gris plus foncé)
+        GRIS = (40, 40, 40)
         
         # Centre de l'écran
         centre_x = self.largeur // 2
@@ -251,11 +269,12 @@ class Visualisation:
         # Affichage des trajectoires
         for corps, points in self.trajectoires.items():
             if len(points) > 1:
-                # Dessine les lignes de la trajectoire
+                # Dessine les lignes de la trajectoire avec la couleur pastel
+                couleur_trajectoire = self.couleur_pastel(corps.couleur)
                 for i in range(len(points) - 1):
                     pos1 = self.convertir_coordonnees(points[i][0], echelle_position)
                     pos2 = self.convertir_coordonnees(points[i + 1][0], echelle_position)
-                    pygame.draw.line(self.ecran, self.GRIS, pos1, pos2, 1)
+                    pygame.draw.line(self.ecran, couleur_trajectoire, pos1, pos2, 1)
         
         # Affichage des corps célestes
         for corps in systeme.obtenir_tous_corps():

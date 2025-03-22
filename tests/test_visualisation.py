@@ -81,25 +81,34 @@ class TestVisualisation(unittest.TestCase):
     
     def test_nettoyer_trajectoire(self):
         """Test du nettoyage des trajectoires."""
+        # Définit la durée de conservation des trajectoires (200 jours)
+        self.visu.duree_trajectoire = 200.0
+        
         # Définit le temps actuel initial
         temps_initial = 100.0
         self.visu.temps_actuel = temps_initial
         
         # Ajoute plusieurs points avec des temps relatifs au temps actuel
         positions = [
-            (np.array([1.496e11, 0.0, 0.0]), temps_initial - 80.0),  # 80 jours avant
-            (np.array([0.0, 1.496e11, 0.0]), temps_initial - 50.0),  # 50 jours avant
-            (np.array([-1.496e11, 0.0, 0.0]), temps_initial - 20.0)  # 20 jours avant
+            (np.array([1.496e11, 0.0, 0.0]), temps_initial - 150.0),  # 150 jours avant
+            (np.array([0.0, 1.496e11, 0.0]), temps_initial - 100.0),  # 100 jours avant
+            (np.array([-1.496e11, 0.0, 0.0]), temps_initial - 50.0)   # 50 jours avant
         ]
         self.visu.trajectoires[self.systeme.planetes[0]] = positions
         
-        # Test 1 : Les points sont tous dans la fenêtre de 90 jours
+        # Test 1 : Les points sont tous dans la fenêtre de 200 jours
         self.visu.nettoyer_trajectoire(self.systeme.planetes[0])
         self.assertEqual(len(self.visu.trajectoires[self.systeme.planetes[0]]), 3,
-                        "Tous les points devraient être conservés car dans la fenêtre de 90 jours")
+                        "Tous les points devraient être conservés car dans la fenêtre de 200 jours")
         
-        # Test 2 : Avance le temps de 60 jours
-        self.visu.temps_actuel = temps_initial + 60.0
+        # Test 2 : Avance le temps de 100 jours
+        self.visu.temps_actuel = temps_initial + 100.0
+        self.visu.nettoyer_trajectoire(self.systeme.planetes[0])
+        self.assertEqual(len(self.visu.trajectoires[self.systeme.planetes[0]]), 2,
+                        "Les deux points les plus récents devraient être conservés")
+        
+        # Test 3 : Avance encore de 50 jours (au lieu de 100)
+        self.visu.temps_actuel = temps_initial + 150.0
         self.visu.nettoyer_trajectoire(self.systeme.planetes[0])
         self.assertEqual(len(self.visu.trajectoires[self.systeme.planetes[0]]), 1,
                         "Seul le point le plus récent devrait être conservé")
@@ -340,6 +349,38 @@ class TestVisualisation(unittest.TestCase):
                 pass  # L'erreur est attendue
             # Vérifie que le programme peut continuer après l'erreur
             self.visu.afficher(self.systeme)  # Ne devrait pas lever d'erreur
+
+    def test_couleur_pastel(self):
+        """Test de la conversion d'une couleur en version pastel."""
+        # Test avec une couleur rouge
+        rouge = (255, 0, 0)
+        rouge_pastel = self.visu.couleur_pastel(rouge)
+        self.assertGreater(rouge_pastel[1], rouge[1], "La version pastel devrait être plus claire en vert")
+        self.assertGreater(rouge_pastel[2], rouge[2], "La version pastel devrait être plus claire en bleu")
+        
+        # Test avec une couleur verte
+        vert = (0, 255, 0)
+        vert_pastel = self.visu.couleur_pastel(vert)
+        self.assertGreater(vert_pastel[0], vert[0], "La version pastel devrait être plus claire en rouge")
+        self.assertGreater(vert_pastel[2], vert[2], "La version pastel devrait être plus claire en bleu")
+        
+        # Test avec une couleur bleue
+        bleu = (0, 0, 255)
+        bleu_pastel = self.visu.couleur_pastel(bleu)
+        self.assertGreater(bleu_pastel[0], bleu[0], "La version pastel devrait être plus claire en rouge")
+        self.assertGreater(bleu_pastel[1], bleu[1], "La version pastel devrait être plus claire en vert")
+        
+        # Test avec une couleur noire
+        noir = (0, 0, 0)
+        noir_pastel = self.visu.couleur_pastel(noir)
+        self.assertGreater(noir_pastel[0], noir[0], "La version pastel devrait être plus claire en rouge")
+        self.assertGreater(noir_pastel[1], noir[1], "La version pastel devrait être plus claire en vert")
+        self.assertGreater(noir_pastel[2], noir[2], "La version pastel devrait être plus claire en bleu")
+        
+        # Test avec une couleur blanche
+        blanc = (255, 255, 255)
+        blanc_pastel = self.visu.couleur_pastel(blanc)
+        self.assertEqual(blanc_pastel, blanc, "Le blanc devrait rester blanc")
 
 
 if __name__ == '__main__':
