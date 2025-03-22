@@ -19,9 +19,10 @@
 * [x] Calcul de la gravité
     * [x] Implémenter la fonction `calculer_gravite(planete1, planete2)`
     * [x] Tests unitaires : vérifier la précision des calculs
-* [ ] Calcul des trajectoires
-    * [ ] Implémenter la fonction `calculer_trajectoire(planete, force, dt)`
-    * [ ] Tests unitaires : vérifier la précision des calculs
+* [x] Calcul des trajectoires
+    * [x] Implémenter la fonction `calculer_acceleration(corps, force, dt)`
+    * [x] Implémenter la fonction `mettre_a_jour_position(corps, dt)`
+    * [x] Tests unitaires : vérifier la précision des calculs
 * [ ] Boucle temporelle et mise à jour des positions
     * [ ] Créer la boucle principale de simulation
     * [ ] Calculer les forces de gravité à chaque itération
@@ -40,7 +41,7 @@
     * [ ] Adapter la fonction de lecture du fichier JSON
     * [ ] Tests unitaires : vérifier la lecture et l'initialisation des données 3D
 * [ ] Calcul de la gravité et des trajectoires en 3D
-    * [ ] Adapter les fonctions `calculer_gravite` et `calculer_trajectoire` pour la 3D
+    * [ ] Adapter les fonctions pour utiliser les coordonnées Z non nulles
     * [ ] Tests unitaires : vérifier la précision des calculs 3D
 * [ ] Affichage 3D avec PyOpenGL
     * [ ] Configurer PyOpenGL pour la scène 3D

@@ -117,4 +117,42 @@ class SystemeSolaire:
         # F = G * (m1 * m2) / r² * (r/|r|)
         force = self.G * corps1.masse * corps2.masse / (distance ** 2) * (r / distance)
         
-        return force 
+        return force
+    
+    def calculer_acceleration(self, corps: CorpsCeleste, force: np.ndarray, dt: float) -> np.ndarray:
+        """Calcule l'accélération d'un corps sous l'effet d'une force.
+        
+        Cette méthode calcule la variation de vitesse (accélération) d'un corps
+        sous l'effet d'une force pendant un intervalle de temps dt.
+        
+        Args:
+            corps (CorpsCeleste): Corps dont on calcule l'accélération
+            force (np.ndarray): Force totale exercée sur le corps en N
+            dt (float): Pas de temps en secondes
+            
+        Returns:
+            np.ndarray: Variation de vitesse en m/s
+        """
+        # Calcul de l'accélération (F = ma)
+        acceleration = force / corps.masse
+        
+        # Calcul de la variation de vitesse (Δv = a * dt)
+        delta_vitesse = acceleration * dt
+        
+        return delta_vitesse
+    
+    def mettre_a_jour_position(self, corps: CorpsCeleste, dt: float) -> None:
+        """Met à jour la position d'un corps en fonction de sa vitesse.
+        
+        Cette méthode met à jour la position d'un corps en utilisant sa vitesse
+        actuelle pendant un intervalle de temps dt.
+        
+        Args:
+            corps (CorpsCeleste): Corps dont on met à jour la position
+            dt (float): Pas de temps en secondes
+        """
+        # Mise à jour de la position (r(t+dt) = r(t) + v(t) * dt)
+        corps.position += corps.vitesse * dt
+        
+        # Enregistrement de la nouvelle position dans la trajectoire
+        corps.trajectoire.append(corps.position.copy()) 
