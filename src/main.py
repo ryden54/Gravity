@@ -7,30 +7,46 @@ Simulation du système solaire - Script principal
 
 import os
 import sys
+import time
 from modele import SystemeSolaire
+from simulation import Simulation
 
 
 def main():
-    """Fonction principale."""
-    # Détermine le chemin du fichier JSON contenant les données des planètes
-    chemin_script = os.path.dirname(os.path.abspath(__file__))
-    chemin_racine = os.path.dirname(chemin_script)
-    chemin_donnees = os.path.join(chemin_racine, 'data', 'planets.json')
+    """Fonction principale du programme."""
+    # Création du système solaire
+    systeme = SystemeSolaire("data/planets.json")
     
-    print(f"Chargement des données depuis {chemin_donnees}")
+    # Création de la simulation avec un pas de temps d'une heure
+    simulation = Simulation(systeme, dt=3600.0)
     
-    # Initialise le système solaire
-    systeme = SystemeSolaire(chemin_donnees)
+    # Durée de simulation (1 jour)
+    duree_simulation = 24 * 3600.0  # 24 heures en secondes
     
-    # Affiche les informations sur les corps célestes
-    print("\nÉtoiles:")
-    for etoile in systeme.etoiles:
-        print(f"  - {etoile.nom}: masse={etoile.masse:.2e} kg, rayon={etoile.rayon:.2e} m")
+    print("Démarrage de la simulation...")
+    print("Appuyez sur Ctrl+C pour arrêter la simulation")
+    temps_debut = time.time()
     
-    print("\nPlanètes:")
-    for planete in systeme.planetes:
-        print(f"  - {planete.nom}: masse={planete.masse:.2e} kg, rayon={planete.rayon:.2e} m")
-        print(f"    Position: {planete.position}, Vitesse: {planete.vitesse}")
+    # Boucle principale de simulation
+    try:
+        while True:
+            # Fait avancer la simulation d'une journée
+            simulation.simuler(duree_simulation)
+            
+            # Affiche l'état actuel
+            temps_ecoule = simulation.obtenir_temps()
+            jours = temps_ecoule / (24 * 3600.0)
+            print(f"Temps écoulé : {jours:.1f} jours")
+            
+            # Petit délai pour ne pas surcharger le CPU
+            time.sleep(0.1)
+            
+    except KeyboardInterrupt:
+        print("\nSimulation arrêtée par l'utilisateur")
+    
+    temps_fin = time.time()
+    duree_reelle = temps_fin - temps_debut
+    print(f"\nSimulation terminée en {duree_reelle:.1f} secondes")
 
 
 if __name__ == "__main__":

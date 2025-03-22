@@ -23,11 +23,11 @@
     * [x] Implémenter la fonction `calculer_acceleration(corps, force, dt)`
     * [x] Implémenter la fonction `mettre_a_jour_position(corps, dt)`
     * [x] Tests unitaires : vérifier la précision des calculs
-* [ ] Boucle temporelle et mise à jour des positions
-    * [ ] Créer la boucle principale de simulation
-    * [ ] Calculer les forces de gravité à chaque itération
-    * [ ] Mettre à jour les positions et vitesses des planètes
-    * [ ] Tests : vérifier la cohérence des évolutions
+* [x] Boucle temporelle et mise à jour des positions
+    * [x] Créer la boucle principale de simulation
+    * [x] Calculer les forces de gravité à chaque itération
+    * [x] Mettre à jour les positions et vitesses des planètes
+    * [x] Tests : vérifier la cohérence des évolutions
 * [ ] Affichage 2D
     * [ ] Afficher les planètes avec `pygame`
     * [ ] Afficher les trajectoires passées
