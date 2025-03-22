@@ -1,30 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
 # Environnement virtuel
 venv/
 env/
 ENV/
 
-# Fichiers Python compilés
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-
-# Distribution / packaging
-dist/
-build/
-*.egg-info/
-
-# Tests unitaires
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Fichiers système
-.DS_Store
-Thumbs.db
-
-# Fichiers d'IDE
+# IDE
 .idea/
 .vscode/
 *.swp
-*.swo 
+*.swo
+
+# Tests et couverture
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Système
+.DS_Store
+Thumbs.db 
