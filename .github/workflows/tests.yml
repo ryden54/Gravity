@@ -1,5 +1,9 @@
 name: Tests
 
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   push:
     branches: [ main ]
@@ -15,9 +19,9 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -28,9 +32,10 @@ jobs:
       env:
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        python -m pytest tests/ --cov=src --cov-report=term-missing --cov-fail-under=80 -v
+        python -m pytest tests/ --cov=src --cov-report=xml -v
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true 

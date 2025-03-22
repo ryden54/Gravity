@@ -1,6 +1,8 @@
-# Simulation du Système Solaire
+# Gravity - Simulation du Système Solaire
 
-Une simulation interactive du système solaire utilisant Python et Pygame.
+[![codecov](https://codecov.io/gh/ryden54/Gravity/graph/badge.svg?token=WUIUVQSV38)](https://codecov.io/gh/ryden54/Gravity)
+
+Une simulation interactive du système solaire utilisant Python et Pygame. Cette application permet d'explorer les mouvements des planètes et des étoiles en temps réel, avec des fonctionnalités de zoom et de pause.
 
 ## Fonctionnalités
 
