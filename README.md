@@ -54,6 +54,7 @@ python main.py [options]
 
 - `--dt <heures>` : Définit l'unité de temps de la simulation en heures (défaut : 24.0)
 - `--fichier <chemin>` : Spécifie le chemin du fichier JSON contenant les données du système solaire (défaut : ../data/planets.json)
+- `--randomSpeedRatio <ratio>` : Variation aléatoire de la vitesse initiale des planètes en pourcentage (défaut : 0.1 pour ±10%)
 
 ### Exemples
 
@@ -64,11 +65,14 @@ python main.py
 # Lancer avec un pas de temps de 12 heures
 python main.py --dt 12.0
 
+# Lancer avec une variation de vitesse de ±20%
+python main.py --randomSpeedRatio 0.2
+
 # Lancer avec un fichier de données personnalisé
 python main.py --fichier ../data/autre_systeme.json
 
 # Combiner les options
-python main.py --fichier ../data/autre_systeme.json --dt 12.0
+python main.py --fichier ../data/autre_systeme.json --dt 12.0 --randomSpeedRatio 0.2
 ```
 
 ### Contrôles
@@ -117,4 +121,4 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 
 ## Licence
 
-Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails. 
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.

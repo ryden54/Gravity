@@ -8,7 +8,7 @@ from src.modele import SystemeSolaire, CorpsCeleste
 class Visualisation:
     """Classe gérant l'affichage 2D du système solaire."""
     
-    def __init__(self, largeur: int = 800, hauteur: int = 600, duree_trajectoire: float = 90.0):
+    def __init__(self, largeur: int = 800, hauteur: int = 600, duree_trajectoire: float = 365.0):
         """Initialise la visualisation.
         
         Args:

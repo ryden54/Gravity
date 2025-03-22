@@ -64,18 +64,20 @@ class SystemeSolaire:
     # Constante gravitationnelle en N⋅m²/kg²
     G = 6.67430e-11
     
-    def __init__(self, etoiles: List[CorpsCeleste] = None, planetes: List[CorpsCeleste] = None):
+    def __init__(self, etoiles: List[CorpsCeleste] = None, planetes: List[CorpsCeleste] = None, randomSpeedRatio: float = 0.1):
         """Initialise le système solaire avec des étoiles et des planètes.
         
         Args:
             etoiles (List[CorpsCeleste], optional): Liste des étoiles du système.
             planetes (List[CorpsCeleste], optional): Liste des planètes du système.
+            randomSpeedRatio (float, optional): Variation aléatoire de la vitesse en pourcentage (0.1 = ±10%).
         """
         self.etoiles = etoiles if etoiles is not None else []
         self.planetes = planetes if planetes is not None else []
+        self.randomSpeedRatio = randomSpeedRatio
     
     @classmethod
-    def depuis_json(cls, fichier_json: str) -> 'SystemeSolaire':
+    def depuis_json(cls, fichier_json: str, randomSpeedRatio: float = 0.1) -> 'SystemeSolaire':
         """Crée un système solaire à partir d'un fichier JSON.
         
         Cette méthode est une factory qui charge les données depuis un fichier JSON
@@ -83,11 +85,12 @@ class SystemeSolaire:
         
         Args:
             fichier_json (str): Chemin vers le fichier JSON contenant les données.
+            randomSpeedRatio (float, optional): Variation aléatoire de la vitesse en pourcentage (0.1 = ±10%).
             
         Returns:
             SystemeSolaire: Nouvelle instance du système solaire.
         """
-        systeme = cls()
+        systeme = cls(randomSpeedRatio=randomSpeedRatio)
         systeme.charger_donnees(fichier_json)
         return systeme
     
@@ -130,6 +133,10 @@ class SystemeSolaire:
                     distance_soleil * np.sin(angle),  # y = r * sin(θ)
                     0.0  # z = 0 (plan de l'écliptique)
                 ])
+                
+                # Application d'une variation aléatoire à la vitesse orbitale
+                variation = np.random.uniform(1 - self.randomSpeedRatio, 1 + self.randomSpeedRatio)
+                vitesse_orbitale *= variation
                 
                 # Calcul de la nouvelle vitesse (perpendiculaire à la position)
                 nouvelle_vitesse = np.array([

@@ -21,11 +21,12 @@ def main():
     parser = argparse.ArgumentParser(description='Simulation du système solaire')
     parser.add_argument('--dt', type=float, default=21600.0, help='Pas de temps en secondes (par défaut 6 heures)')
     parser.add_argument('--fichier', type=str, default="data/planets.json", help='Fichier de données JSON')
+    parser.add_argument('--randomSpeedRatio', type=float, default=0.1, help='Variation aléatoire de la vitesse en pourcentage (0.1 = ±10%)')
     args = parser.parse_args()
 
     # Charge les données
     try:
-        systeme = SystemeSolaire.depuis_json(args.fichier)
+        systeme = SystemeSolaire.depuis_json(args.fichier, randomSpeedRatio=args.randomSpeedRatio)
     except FileNotFoundError:
         raise FileNotFoundError(f"Le fichier {args.fichier} n'existe pas.")
     except json.JSONDecodeError:
