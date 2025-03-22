@@ -56,18 +56,17 @@ def main():
             en_cours = False
             break
         
-        # Mise à jour de la simulation
-        simulation.simuler(dt)  # Avance d'un pas de temps
-        
-        # Mise à jour du temps dans la visualisation
-        temps_jours = simulation.obtenir_temps() / (24 * 3600)
-        visualisation.mettre_a_jour_temps(temps_jours)
+        # Mise à jour de la simulation si pas en pause
+        if not visualisation.en_pause:
+            simulation.simuler(dt)  # Avance d'un pas de temps
+            # Mise à jour du temps dans la visualisation
+            temps_jours = simulation.obtenir_temps() / (24 * 3600)
+            visualisation.mettre_a_jour_temps(temps_jours)
+            # Affichage du temps écoulé
+            print(f"\rTemps écoulé : {temps_jours:.1f} jours", end="")
         
         # Affichage
         visualisation.afficher(systeme)
-        
-        # Affichage du temps écoulé
-        print(f"\rTemps écoulé : {temps_jours:.1f} jours", end="")
     
     print("\nSimulation arrêtée par l'utilisateur")
     visualisation.fermer()

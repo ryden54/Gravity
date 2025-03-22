@@ -26,10 +26,12 @@ class Visualisation:
         self.temps_actuel = 0.0  # Temps en jours
         self.marge = 50  # Marge en pixels pour éviter que les planètes touchent les bords
         self.date_debut = datetime.now()  # Date de début de la simulation (date actuelle)
+        self.en_pause = False  # État de pause de la simulation
         
         # Couleurs
         self.NOIR = (0, 0, 0)
         self.BLANC = (255, 255, 255)
+        self.GRIS = (40, 40, 40)
     
     def calculer_echelle(self, systeme: SystemeSolaire) -> float:
         """Calcule l'échelle appropriée pour afficher tous les corps.
@@ -240,6 +242,11 @@ class Visualisation:
         texte_date = font.render(date_str, True, self.BLANC)
         self.ecran.blit(texte_date, (10, 10))
         
+        # Affichage de l'état de pause
+        if self.en_pause:
+            texte_pause = font.render("PAUSE", True, self.BLANC)
+            self.ecran.blit(texte_pause, (self.largeur - 100, 10))
+        
         # Affichage des trajectoires
         for corps, points in self.trajectoires.items():
             if len(points) > 1:
@@ -283,6 +290,8 @@ class Visualisation:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return False
+                elif event.key == pygame.K_SPACE:
+                    self.en_pause = not self.en_pause
             elif event.type == pygame.VIDEORESIZE:
                 # Mise à jour de la taille de la fenêtre
                 self.ecran = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
