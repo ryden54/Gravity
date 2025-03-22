@@ -29,6 +29,9 @@ class CorpsCeleste:
 class SystemeSolaire:
     """Classe représentant le système solaire avec ses étoiles et planètes."""
     
+    # Constante gravitationnelle en N⋅m²/kg²
+    G = 6.67430e-11
+    
     def __init__(self, fichier_json: str):
         """Initialise le système solaire à partir d'un fichier JSON.
         
@@ -88,4 +91,30 @@ class SystemeSolaire:
         Returns:
             List[CorpsCeleste]: Liste de tous les corps célestes.
         """
-        return self.etoiles + self.planetes 
+        return self.etoiles + self.planetes
+    
+    def calculer_gravite(self, corps1: CorpsCeleste, corps2: CorpsCeleste) -> np.ndarray:
+        """Calcule la force de gravité exercée par corps2 sur corps1.
+        
+        Args:
+            corps1 (CorpsCeleste): Corps sur lequel la force est calculée
+            corps2 (CorpsCeleste): Corps qui exerce la force
+            
+        Returns:
+            np.ndarray: Vecteur force de gravité en N
+        """
+        # Calcul du vecteur de position relative
+        r = corps2.position - corps1.position
+        
+        # Distance entre les centres des corps
+        distance = np.linalg.norm(r)
+        
+        # Vérification pour éviter la division par zéro
+        if distance < 1e-10:
+            return np.zeros(3)
+        
+        # Calcul de la force selon la loi de gravitation universelle
+        # F = G * (m1 * m2) / r² * (r/|r|)
+        force = self.G * corps1.masse * corps2.masse / (distance ** 2) * (r / distance)
+        
+        return force 

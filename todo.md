@@ -16,9 +16,9 @@
 
 ## Phase 2 : Implémentation de la simulation 2D (Itérations 2-4)
 
-* [ ] Calcul de la gravité
-    * [ ] Implémenter la fonction `calculer_gravite(planete1, planete2)`
-    * [ ] Tests unitaires : vérifier la précision des calculs
+* [x] Calcul de la gravité
+    * [x] Implémenter la fonction `calculer_gravite(planete1, planete2)`
+    * [x] Tests unitaires : vérifier la précision des calculs
 * [ ] Calcul des trajectoires
     * [ ] Implémenter la fonction `calculer_trajectoire(planete, force, dt)`
     * [ ] Tests unitaires : vérifier la précision des calculs
