@@ -96,14 +96,37 @@ class SystemeSolaire:
                 )
                 self.etoiles.append(etoile)
             
-            # Charger les planètes
+            # Charger les planètes avec positions aléatoires
             for planete_data in donnees.get('planetes', []):
+                # Calcul de la distance au soleil à partir de la position initiale
+                position_initiale = np.array(planete_data['position'], dtype=float)
+                vitesse_initiale = np.array(planete_data['vitesse'], dtype=float)
+                distance_soleil = np.linalg.norm(position_initiale)
+                vitesse_orbitale = np.linalg.norm(vitesse_initiale)
+                
+                # Génération d'un angle aléatoire entre 0 et 2π
+                angle = np.random.uniform(0, 2 * np.pi)
+                
+                # Calcul de la nouvelle position
+                nouvelle_position = np.array([
+                    distance_soleil * np.cos(angle),  # x = r * cos(θ)
+                    distance_soleil * np.sin(angle),  # y = r * sin(θ)
+                    0.0  # z = 0 (plan de l'écliptique)
+                ])
+                
+                # Calcul de la nouvelle vitesse (perpendiculaire à la position)
+                nouvelle_vitesse = np.array([
+                    -vitesse_orbitale * np.sin(angle),  # vx = -v * sin(θ)
+                    vitesse_orbitale * np.cos(angle),   # vy = v * cos(θ)
+                    0.0  # vz = 0
+                ])
+                
                 planete = CorpsCeleste(
                     nom=planete_data['nom'],
                     masse=planete_data['masse'],
                     rayon=planete_data['rayon'],
-                    position=planete_data['position'],
-                    vitesse=planete_data['vitesse'],
+                    position=nouvelle_position,
+                    vitesse=nouvelle_vitesse,
                     couleur=tuple(planete_data['couleur'])
                 )
                 self.planetes.append(planete)
