@@ -27,19 +27,15 @@ def main():
     try:
         systeme = SystemeSolaire.depuis_json(args.fichier)
     except FileNotFoundError:
-        print(f"Erreur : Le fichier {args.fichier} n'existe pas.")
-        return
+        raise FileNotFoundError(f"Le fichier {args.fichier} n'existe pas.")
     except json.JSONDecodeError:
-        print(f"Erreur : Le fichier {args.fichier} n'est pas un fichier JSON valide.")
-        return
+        raise ValueError(f"Le fichier {args.fichier} n'est pas un fichier JSON valide.")
 
     # Vérifie qu'il y a au moins une étoile et une planète
     if not systeme.etoiles:
-        print("Erreur : Aucune étoile trouvée dans le système.")
-        return
+        raise ValueError("Aucune étoile trouvée dans le système.")
     if not systeme.planetes:
-        print("Erreur : Aucune planète trouvée dans le système.")
-        return
+        raise ValueError("Aucune planète trouvée dans le système.")
 
     # Crée la simulation et la visualisation
     simulation = Simulation(systeme, args.dt)
@@ -48,8 +44,9 @@ def main():
     # Boucle principale
     en_cours = True
     while en_cours:
-        # Met à jour la simulation
-        simulation.simuler(args.dt)  # Utilise le pas de temps spécifié
+        # Met à jour la simulation seulement si on n'est pas en pause
+        if not visualisation.en_pause:
+            simulation.simuler(args.dt)  # Utilise le pas de temps spécifié
 
         # Met à jour la visualisation
         visualisation.mettre_a_jour_temps(simulation.temps / (24 * 3600))  # Conversion en jours

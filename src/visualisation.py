@@ -29,11 +29,12 @@ class Visualisation:
         self.en_pause = False  # État de pause de la simulation
         self.echelle_courante = None  # Échelle actuelle pour l'affichage
         self._dernier_systeme = None  # Dernier système affiché
+        self.police = pygame.font.Font(None, 36)
         
         # Couleurs
         self.NOIR = (0, 0, 0)
         self.BLANC = (255, 255, 255)
-        self.GRIS = (40, 40, 40)
+        self.GRIS = (80, 80, 80)
     
     def calculer_echelle(self, systeme: SystemeSolaire) -> float:
         """Calcule l'échelle appropriée pour afficher tous les corps.
@@ -169,8 +170,8 @@ class Visualisation:
         Args:
             echelle (float): Échelle en pixels/mètre
         """
-        # Couleur de la grille (gris clair avec transparence)
-        GRIS = (40, 40, 40)
+        # Couleur de la grille (gris plus clair)
+        GRIS = (120, 120, 120)
         
         # Centre de l'écran
         centre_x = self.largeur // 2
@@ -197,9 +198,14 @@ class Visualisation:
             distance_ua = i / 3  # Distance en UA
             texte = font.render(f"{distance_ua:.1f} UA", True, GRIS)
             # Position du texte à droite du cercle sur l'axe Y
-            texte_x = centre_x + int(rayon) + 5
-            texte_y = centre_y - 7  # Ajustement vertical pour centrer le texte
-            self.ecran.blit(texte, (texte_x, texte_y))
+            self.ecran.blit(texte, (centre_x + int(rayon) + 5, centre_y - 10))
+        
+        # Dessine les lignes radiales
+        for angle in range(0, 360, 45):  # Lignes tous les 45 degrés
+            rad = np.radians(angle)
+            x = centre_x + int(max_rayon * ua_en_pixels * np.cos(rad))
+            y = centre_y + int(max_rayon * ua_en_pixels * np.sin(rad))
+            pygame.draw.line(self.ecran, GRIS, (centre_x, centre_y), (x, y), 1)
     
     def afficher(self, systeme: SystemeSolaire) -> None:
         """Affiche le système solaire.
@@ -215,11 +221,12 @@ class Visualisation:
         echelle_taille = echelle_position * 100  # Facteur de base plus petit
         facteur_log = 5.0  # Facteur pour la fonction logarithmique (augmenté de 2.0 à 5.0)
         
-        # Effacement de l'écran
+        # Efface l'écran
         self.ecran.fill(self.NOIR)
         
-        # Dessin de la grille
-        self.dessiner_grille(echelle_position)
+        # Dessine la grille seulement si le système n'est pas vide
+        if systeme.obtenir_tous_corps():
+            self.dessiner_grille(echelle_position)
         
         # Calcul de la date actuelle
         jours_entiers = int(self.temps_actuel)
@@ -233,13 +240,12 @@ class Visualisation:
         date_str = date_actuelle.strftime("%d/%m/%Y") + f" {heures:02d}:{minutes:02d}:{secondes:02d}"
         
         # Affichage de la date
-        font = pygame.font.Font(None, 24)
-        texte_date = font.render(date_str, True, self.BLANC)
+        texte_date = self.police.render(date_str, True, self.BLANC)
         self.ecran.blit(texte_date, (10, 10))
         
         # Affichage de l'état de pause
         if self.en_pause:
-            texte_pause = font.render("PAUSE", True, self.BLANC)
+            texte_pause = self.police.render("PAUSE", True, self.BLANC)
             self.ecran.blit(texte_pause, (self.largeur - 100, 10))
         
         # Affichage des trajectoires
@@ -313,9 +319,9 @@ class Visualisation:
                     self.en_pause = not self.en_pause
             elif event.type == pygame.VIDEORESIZE:
                 # Mise à jour de la taille de la fenêtre
-                self.ecran = pygame.display.set_mode((event.w, event.h), pygame.RESIZABLE)
-                self.largeur = event.w
-                self.hauteur = event.h
+                self.ecran = pygame.display.set_mode((event.size[0], event.size[1]), pygame.RESIZABLE)
+                self.largeur = event.size[0]
+                self.hauteur = event.size[1]
         return True
     
     def fermer(self) -> None:
