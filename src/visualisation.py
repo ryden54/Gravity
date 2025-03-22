@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+from datetime import datetime, timedelta
 from typing import Tuple, Dict, List
 from src.modele import SystemeSolaire, CorpsCeleste
 
@@ -24,6 +25,7 @@ class Visualisation:
         self.trajectoires: Dict[CorpsCeleste, List[Tuple[np.ndarray, float]]] = {}
         self.temps_actuel = 0.0  # Temps en jours
         self.marge = 50  # Marge en pixels pour éviter que les planètes touchent les bords
+        self.date_debut = datetime.now()  # Date de début de la simulation (date actuelle)
         
         # Couleurs
         self.NOIR = (0, 0, 0)
@@ -144,6 +146,22 @@ class Visualisation:
         
         # Effacement de l'écran
         self.ecran.fill(self.NOIR)
+        
+        # Calcul de la date actuelle
+        jours_entiers = int(self.temps_actuel)
+        fraction_jour = self.temps_actuel - jours_entiers
+        secondes_totales = int(fraction_jour * 24 * 3600)  # Conversion en secondes
+        heures = secondes_totales // 3600
+        minutes = (secondes_totales % 3600) // 60
+        secondes = secondes_totales % 60
+        
+        date_actuelle = self.date_debut + timedelta(days=jours_entiers)
+        date_str = date_actuelle.strftime("%d/%m/%Y") + f" {heures:02d}:{minutes:02d}:{secondes:02d}"
+        
+        # Affichage de la date
+        font = pygame.font.Font(None, 24)
+        texte_date = font.render(date_str, True, self.BLANC)
+        self.ecran.blit(texte_date, (10, 10))
         
         # Affichage des trajectoires
         for corps, points in self.trajectoires.items():
