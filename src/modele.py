@@ -15,17 +15,14 @@ class CorpsCeleste:
     position: np.ndarray
     vitesse: np.ndarray
     couleur: Tuple[int, int, int]
-    trajectoire: Optional[List[np.ndarray]] = None
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     
     def __post_init__(self):
-        """Convertit les listes en tableaux numpy si nécessaire et initialise la trajectoire."""
+        """Convertit les listes en tableaux numpy si nécessaire."""
         if isinstance(self.position, list):
             self.position = np.array(self.position, dtype=float)
         if isinstance(self.vitesse, list):
             self.vitesse = np.array(self.vitesse, dtype=float)
-        if self.trajectoire is None:
-            self.trajectoire = [self.position.copy()]
 
     def __eq__(self, autre: object) -> bool:
         """Vérifie si deux corps célestes sont égaux.
@@ -47,6 +44,18 @@ class CorpsCeleste:
             int: Hash basé sur l'ID unique du corps
         """
         return hash(self.id)
+
+    def mettre_a_jour_position(self, dt: float) -> None:
+        """Met à jour la position d'un corps en fonction de sa vitesse.
+        
+        Cette méthode met à jour la position d'un corps en utilisant sa vitesse
+        actuelle pendant un intervalle de temps dt.
+        
+        Args:
+            dt (float): Pas de temps en secondes
+        """
+        # Mise à jour de la position (r(t+dt) = r(t) + v(t) * dt)
+        self.position += self.vitesse * dt
 
 
 class SystemeSolaire:
@@ -174,8 +183,4 @@ class SystemeSolaire:
             corps (CorpsCeleste): Corps dont on met à jour la position
             dt (float): Pas de temps en secondes
         """
-        # Mise à jour de la position (r(t+dt) = r(t) + v(t) * dt)
-        corps.position += corps.vitesse * dt
-        
-        # Enregistrement de la nouvelle position dans la trajectoire
-        corps.trajectoire.append(corps.position.copy()) 
+        corps.mettre_a_jour_position(dt) 

@@ -33,6 +33,7 @@
     * [x] Afficher les trajectoires passées
     * [x] Afficher les noms des planètes
     * [x] Tests visuels : vérifier l'affichage et les trajectoires
+    * [ ] Faire disparaître les trajectoires après 3 mois
 
 ## Phase 3 : Ajout de la 3D (Itérations 5-7)
 

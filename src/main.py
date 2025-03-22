@@ -8,58 +8,69 @@ Simulation du système solaire - Script principal
 import os
 import sys
 import time
+import argparse
+import pygame
 from src.modele import SystemeSolaire
 from src.simulation import Simulation
 from src.visualisation import Visualisation
 
 
 def main():
-    """Fonction principale du programme."""
-    # Création du système solaire
+    """Point d'entrée principal du programme."""
+    # Analyse des arguments en ligne de commande
+    parser = argparse.ArgumentParser(description="Simulation du système solaire")
+    parser.add_argument("--dt", type=float, default=24.0,
+                      help="Unité de temps de la simulation en heures (défaut: 24.0)")
+    args = parser.parse_args()
+    
+    # Conversion des heures en secondes
+    dt = args.dt * 3600.0
+    
+    # Chargement du système solaire
     systeme = SystemeSolaire("data/planets.json")
     
-    # Création de la simulation avec un pas de temps d'une heure
-    simulation = Simulation(systeme, dt=3600.0)
+    # Vérification du chargement des corps célestes
+    if not systeme.etoiles:
+        print("Erreur : Aucune étoile n'a été chargée. La simulation ne peut pas démarrer.")
+        return
+    
+    if not systeme.planetes:
+        print("Erreur : Aucune planète n'a été chargée. La simulation ne peut pas démarrer.")
+        return
+    
+    print(f"Démarrage de la simulation (dt = {args.dt:.1f} heures)...")
+    print("Appuyez sur Échap pour quitter")
+    print("Vous pouvez redimensionner la fenêtre à tout moment")
+    
+    # Création de la simulation
+    simulation = Simulation(systeme)
     
     # Création de la visualisation
-    visu = Visualisation()
+    visualisation = Visualisation(duree_trajectoire=90.0)  # 3 mois
     
-    # Durée de simulation (1 jour)
-    duree_simulation = 24 * 3600.0  # 24 heures en secondes
+    # Boucle principale
+    en_cours = True
+    while en_cours:
+        # Gestion des événements
+        if not visualisation.gerer_evenements():
+            en_cours = False
+            break
+        
+        # Mise à jour de la simulation
+        simulation.simuler(dt)  # Avance d'un pas de temps
+        
+        # Mise à jour du temps dans la visualisation
+        temps_jours = simulation.obtenir_temps() / (24 * 3600)
+        visualisation.mettre_a_jour_temps(temps_jours)
+        
+        # Affichage
+        visualisation.afficher(systeme)
+        
+        # Affichage du temps écoulé
+        print(f"\rTemps écoulé : {temps_jours:.1f} jours", end="")
     
-    print("Démarrage de la simulation...")
-    print("Appuyez sur Échap pour quitter")
-    temps_debut = time.time()
-    
-    # Boucle principale de simulation
-    try:
-        while True:
-            # Gestion des événements Pygame
-            if not visu.gerer_evenements():
-                break
-            
-            # Fait avancer la simulation d'une journée
-            simulation.simuler(duree_simulation)
-            
-            # Affiche l'état actuel
-            temps_ecoule = simulation.obtenir_temps()
-            jours = temps_ecoule / (24 * 3600.0)
-            print(f"Temps écoulé : {jours:.1f} jours", end='\r')
-            
-            # Met à jour l'affichage
-            visu.dessiner_systeme(systeme)
-            
-            # Limite le framerate à 60 FPS
-            time.sleep(1/60)
-            
-    except KeyboardInterrupt:
-        print("\nSimulation arrêtée par l'utilisateur")
-    finally:
-        visu.fermer()
-    
-    temps_fin = time.time()
-    duree_reelle = temps_fin - temps_debut
-    print(f"\nSimulation terminée en {duree_reelle:.1f} secondes")
+    print("\nSimulation arrêtée par l'utilisateur")
+    visualisation.fermer()
 
 
 if __name__ == "__main__":

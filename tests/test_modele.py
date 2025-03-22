@@ -41,6 +41,38 @@ class TestCorpsCeleste(unittest.TestCase):
         self.assertTrue(isinstance(corps.trajectoire, list))
         self.assertTrue(np.array_equal(corps.trajectoire[0], np.array([1.4960e11, 0, 0])))
 
+    def test_nettoyage_trajectoire(self):
+        """Teste le nettoyage des trajectoires après 3 mois."""
+        # Création d'un corps céleste
+        corps = CorpsCeleste(
+            nom="Test",
+            masse=1e24,
+            rayon=1e6,
+            position=np.array([0.0, 0.0, 0.0]),
+            vitesse=np.array([0.0, 0.0, 0.0]),
+            couleur=(255, 255, 255)
+        )
+        
+        # Ajout de points de trajectoire sur 4 mois
+        for i in range(120):  # 4 mois = 120 jours
+            position = np.array([float(i), 0.0, 0.0])
+            corps.ajouter_point_trajectoire(position, float(i))
+        
+        # Vérification de la taille initiale
+        self.assertEqual(len(corps.trajectoire), 120)
+        self.assertEqual(len(corps.temps_trajectoire), 120)
+        
+        # Nettoyage à 3 mois
+        corps.nettoyer_trajectoire(90.0)
+        
+        # Vérification de la taille après nettoyage
+        self.assertEqual(len(corps.trajectoire), 30)  # Les 30 derniers jours
+        self.assertEqual(len(corps.temps_trajectoire), 30)
+        
+        # Vérification que les points conservés sont les plus récents
+        self.assertEqual(corps.temps_trajectoire[0], 90.0)
+        self.assertEqual(corps.temps_trajectoire[-1], 119.0)
+
 
 class TestSystemeSolaire(unittest.TestCase):
     """Tests pour la classe SystemeSolaire."""
