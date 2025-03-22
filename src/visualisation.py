@@ -217,14 +217,19 @@ class Visualisation:
         Args:
             systeme (SystemeSolaire): Système solaire à afficher
         """
-        # Calcul de l'échelle
-        echelle = self.calculer_echelle(systeme)
+        # Calcul de l'échelle pour les positions
+        echelle_position = self.calculer_echelle(systeme)
+        
+        # Échelle pour la taille des corps (logarithmique)
+        # On utilise une échelle plus petite et on applique une fonction logarithmique
+        echelle_taille = echelle_position * 100  # Facteur de base plus petit
+        facteur_log = 5.0  # Facteur pour la fonction logarithmique (augmenté de 2.0 à 5.0)
         
         # Effacement de l'écran
         self.ecran.fill(self.NOIR)
         
         # Dessin de la grille
-        self.dessiner_grille(echelle)
+        self.dessiner_grille(echelle_position)
         
         # Calcul de la date actuelle
         jours_entiers = int(self.temps_actuel)
@@ -250,27 +255,51 @@ class Visualisation:
         # Affichage des trajectoires
         for corps, points in self.trajectoires.items():
             if len(points) > 1:
-                # Conversion des points en coordonnées d'écran
-                points_ecran = []
-                for position, _ in points:
-                    x, y = self.convertir_coordonnees(position, echelle)
-                    points_ecran.append((int(x), int(y)))
-                
-                # Dessin de la trajectoire
-                pygame.draw.lines(self.ecran, corps.couleur, False, points_ecran, 1)
+                # Dessine les lignes de la trajectoire
+                for i in range(len(points) - 1):
+                    pos1 = self.convertir_coordonnees(points[i][0], echelle_position)
+                    pos2 = self.convertir_coordonnees(points[i + 1][0], echelle_position)
+                    pygame.draw.line(self.ecran, self.GRIS, pos1, pos2, 1)
         
         # Affichage des corps célestes
         for corps in systeme.obtenir_tous_corps():
-            # Conversion des coordonnées
-            x, y = self.convertir_coordonnees(corps.position, echelle)
+            # Conversion des coordonnées avec l'échelle de position
+            pos = self.convertir_coordonnees(corps.position, echelle_position)
+            
+            # Calcul de la taille à l'échelle (en pixels)
+            # On utilise une fonction logarithmique pour la taille
+            taille_reelle = np.log1p(corps.rayon * echelle_taille) * facteur_log
+            
+            # Taille minimale pour la visibilité (2 pixels)
+            taille_min = 2
+            taille = max(taille_reelle, taille_min)
+            
+            # Taille maximale pour éviter que le soleil n'occupe toute la fenêtre
+            taille_max = min(self.largeur, self.hauteur) * 0.2  # 20% de la plus petite dimension
+            taille = min(taille, taille_max)
             
             # Dessin du corps
-            pygame.draw.circle(self.ecran, corps.couleur, (int(x), int(y)), 5)
+            pygame.draw.circle(self.ecran, corps.couleur, pos, int(taille))
             
             # Affichage du nom
             font = pygame.font.Font(None, 24)
             texte = font.render(corps.nom, True, self.BLANC)
-            self.ecran.blit(texte, (int(x) + 10, int(y) - 10))
+            
+            # Position du texte
+            if corps.nom == "Soleil":
+                # Pour le soleil, on place le texte plus loin et on ajoute un contour noir
+                texte_x = pos[0] + int(taille) + 15  # Plus loin du soleil
+                texte_y = pos[1] - 10
+                # Dessine le contour noir
+                texte_contour = font.render(corps.nom, True, self.NOIR)
+                for dx, dy in [(-1, -1), (-1, 1), (1, -1), (1, 1)]:
+                    self.ecran.blit(texte_contour, (texte_x + dx, texte_y + dy))
+            else:
+                # Pour les autres corps, on garde le positionnement actuel
+                texte_x = pos[0] + 10
+                texte_y = pos[1] - 10
+            
+            self.ecran.blit(texte, (texte_x, texte_y))
             
             # Ajout du point à la trajectoire
             self.ajouter_point_trajectoire(corps, corps.position)
