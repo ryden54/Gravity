@@ -38,40 +38,77 @@ class TestCorpsCeleste(unittest.TestCase):
         self.assertTrue(np.array_equal(corps.position, np.array([1.4960e11, 0, 0])))
         self.assertTrue(np.array_equal(corps.vitesse, np.array([0, 2.9783e4, 0])))
         self.assertEqual(corps.couleur, (0, 0, 255))
-        self.assertTrue(isinstance(corps.trajectoire, list))
-        self.assertTrue(np.array_equal(corps.trajectoire[0], np.array([1.4960e11, 0, 0])))
+        self.assertTrue(isinstance(corps.id, str))
 
-    def test_nettoyage_trajectoire(self):
-        """Teste le nettoyage des trajectoires après 3 mois."""
-        # Création d'un corps céleste
+    def test_post_init(self):
+        """Teste la conversion des listes en tableaux numpy."""
         corps = CorpsCeleste(
             nom="Test",
-            masse=1e24,
-            rayon=1e6,
-            position=np.array([0.0, 0.0, 0.0]),
-            vitesse=np.array([0.0, 0.0, 0.0]),
+            masse=1.0,
+            rayon=1.0,
+            position=[1.0, 2.0, 3.0],
+            vitesse=[4.0, 5.0, 6.0],
             couleur=(255, 255, 255)
         )
         
-        # Ajout de points de trajectoire sur 4 mois
-        for i in range(120):  # 4 mois = 120 jours
-            position = np.array([float(i), 0.0, 0.0])
-            corps.ajouter_point_trajectoire(position, float(i))
+        self.assertTrue(isinstance(corps.position, np.ndarray))
+        self.assertTrue(isinstance(corps.vitesse, np.ndarray))
+        self.assertEqual(corps.position.dtype, np.float64)
+        self.assertEqual(corps.vitesse.dtype, np.float64)
+
+    def test_mettre_a_jour_position(self):
+        """Teste la mise à jour de la position d'un corps céleste."""
+        corps = CorpsCeleste(
+            nom="Test",
+            masse=1.0,
+            rayon=1.0,
+            position=[0.0, 0.0, 0.0],
+            vitesse=[1.0, 2.0, 3.0],
+            couleur=(255, 255, 255)
+        )
         
-        # Vérification de la taille initiale
-        self.assertEqual(len(corps.trajectoire), 120)
-        self.assertEqual(len(corps.temps_trajectoire), 120)
+        dt = 2.0  # Pas de temps de 2 secondes
+        corps.mettre_a_jour_position(dt)
         
-        # Nettoyage à 3 mois
-        corps.nettoyer_trajectoire(90.0)
+        # Position attendue après dt secondes
+        position_attendue = np.array([2.0, 4.0, 6.0])  # position = vitesse * dt
+        self.assertTrue(np.allclose(corps.position, position_attendue))
+
+    def test_egalite_corps(self):
+        """Teste l'égalité entre deux corps célestes."""
+        corps1 = CorpsCeleste(
+            nom="Test1",
+            masse=1.0,
+            rayon=1.0,
+            position=[0.0, 0.0, 0.0],
+            vitesse=[0.0, 0.0, 0.0],
+            couleur=(255, 255, 255)
+        )
         
-        # Vérification de la taille après nettoyage
-        self.assertEqual(len(corps.trajectoire), 30)  # Les 30 derniers jours
-        self.assertEqual(len(corps.temps_trajectoire), 30)
+        # Même corps avec des attributs différents mais même ID
+        corps2 = CorpsCeleste(
+            nom="Test2",
+            masse=2.0,
+            rayon=2.0,
+            position=[1.0, 1.0, 1.0],
+            vitesse=[1.0, 1.0, 1.0],
+            couleur=(0, 0, 0),
+            id=corps1.id
+        )
         
-        # Vérification que les points conservés sont les plus récents
-        self.assertEqual(corps.temps_trajectoire[0], 90.0)
-        self.assertEqual(corps.temps_trajectoire[-1], 119.0)
+        # Corps différent
+        corps3 = CorpsCeleste(
+            nom="Test3",
+            masse=1.0,
+            rayon=1.0,
+            position=[0.0, 0.0, 0.0],
+            vitesse=[0.0, 0.0, 0.0],
+            couleur=(255, 255, 255)
+        )
+        
+        self.assertEqual(corps1, corps2)  # Même ID
+        self.assertNotEqual(corps1, corps3)  # ID différent
+        self.assertNotEqual(corps1, "pas un corps")  # Type différent
 
 
 class TestSystemeSolaire(unittest.TestCase):
@@ -123,8 +160,17 @@ class TestSystemeSolaire(unittest.TestCase):
         self.assertEqual(soleil.nom, "Soleil")
         self.assertEqual(terre.nom, "Terre")
         
-        self.assertTrue(np.array_equal(soleil.position, np.array([0, 0, 0])))
-        self.assertTrue(np.array_equal(terre.position, np.array([1.4960e11, 0, 0])))
+        # Vérification que la position de la Terre est sur son orbite
+        distance_soleil = np.linalg.norm(terre.position)
+        self.assertAlmostEqual(distance_soleil, 1.4960e11, delta=1e6)
+        
+        # Vérification que la vitesse est perpendiculaire à la position
+        produit_scalaire = np.dot(terre.position, terre.vitesse)
+        self.assertAlmostEqual(produit_scalaire, 0.0, delta=1e6)
+        
+        # Vérification que la norme de la vitesse est conservée
+        vitesse = np.linalg.norm(terre.vitesse)
+        self.assertAlmostEqual(vitesse, 2.9783e4, delta=1.0)
     
     def test_obtenir_tous_corps(self):
         """Teste la méthode pour obtenir tous les corps célestes."""
@@ -134,6 +180,63 @@ class TestSystemeSolaire(unittest.TestCase):
         self.assertEqual(len(tous_corps), 2)
         self.assertEqual(tous_corps[0].nom, "Soleil")
         self.assertEqual(tous_corps[1].nom, "Terre")
+    
+    def test_calculer_gravite(self):
+        """Teste le calcul de la force de gravité entre deux corps."""
+        systeme = SystemeSolaire(self.temp_fichier.name)
+        soleil = systeme.etoiles[0]
+        terre = systeme.planetes[0]
+        
+        # Calcul de la force de gravité
+        force = systeme.calculer_gravite(terre, soleil)
+        
+        # La force doit être dirigée vers le soleil
+        direction = -terre.position / np.linalg.norm(terre.position)
+        force_normalisee = force / np.linalg.norm(force)
+        
+        # Vérification de la direction
+        self.assertTrue(np.allclose(direction, force_normalisee, rtol=1e-10))
+        
+        # Vérification de l'intensité (loi de Newton)
+        distance = np.linalg.norm(terre.position)
+        intensite_attendue = systeme.G * terre.masse * soleil.masse / (distance ** 2)
+        intensite_calculee = np.linalg.norm(force)
+        
+        self.assertAlmostEqual(intensite_calculee, intensite_attendue, delta=1e20)
+    
+    def test_calculer_acceleration(self):
+        """Teste le calcul de l'accélération d'un corps sous l'effet d'une force."""
+        systeme = SystemeSolaire(self.temp_fichier.name)
+        terre = systeme.planetes[0]
+        
+        # Force test de 1N dans chaque direction
+        force = np.array([1.0, 1.0, 1.0])
+        dt = 1.0
+        
+        # Calcul de l'accélération
+        delta_v = systeme.calculer_acceleration(terre, force, dt)
+        
+        # Vérification que a = F/m
+        acceleration_attendue = force / terre.masse * dt
+        self.assertTrue(np.allclose(delta_v, acceleration_attendue))
+    
+    def test_erreur_fichier_inexistant(self):
+        """Teste la gestion des fichiers inexistants."""
+        systeme = SystemeSolaire("fichier_inexistant.json")
+        self.assertEqual(len(systeme.etoiles), 0)
+        self.assertEqual(len(systeme.planetes), 0)
+    
+    def test_erreur_fichier_invalide(self):
+        """Teste la gestion des fichiers JSON invalides."""
+        with tempfile.NamedTemporaryFile(delete=False, mode='w', suffix='.json') as f:
+            f.write("{ json invalide }")
+            f.close()
+            
+        systeme = SystemeSolaire(f.name)
+        self.assertEqual(len(systeme.etoiles), 0)
+        self.assertEqual(len(systeme.planetes), 0)
+        
+        os.unlink(f.name)
 
 
 if __name__ == '__main__':
