@@ -171,6 +171,44 @@ class Visualisation:
         """
         self.temps_actuel = temps
     
+    def dessiner_grille(self, echelle: float) -> None:
+        """Dessine une grille de cercles concentriques pour aider à la lisibilité.
+        
+        Args:
+            echelle (float): Échelle en pixels/mètre
+        """
+        # Couleur de la grille (gris clair avec transparence)
+        GRIS = (40, 40, 40)
+        
+        # Centre de l'écran
+        centre_x = self.largeur // 2
+        centre_y = self.hauteur // 2
+        
+        # Rayon de la plus grande orbite visible (Mars : 1.524 UA)
+        max_rayon = 2.0  # UA
+        
+        # Nombre de cercles à dessiner
+        nb_cercles = int(max_rayon * 3)  # 1 cercle par 1/3 d'UA
+        
+        # Conversion UA en pixels
+        ua_en_pixels = 149597870700 * echelle  # 1 UA = 149597870700 mètres
+        
+        # Police pour les légendes
+        font = pygame.font.Font(None, 20)
+        
+        # Dessine les cercles concentriques et les légendes
+        for i in range(1, nb_cercles + 1):
+            rayon = (i / 3) * ua_en_pixels  # Rayon en pixels
+            pygame.draw.circle(self.ecran, GRIS, (centre_x, centre_y), int(rayon), 1)
+            
+            # Affichage de la légende sur l'axe Y
+            distance_ua = i / 3  # Distance en UA
+            texte = font.render(f"{distance_ua:.1f} UA", True, GRIS)
+            # Position du texte à droite du cercle sur l'axe Y
+            texte_x = centre_x + int(rayon) + 5
+            texte_y = centre_y - 7  # Ajustement vertical pour centrer le texte
+            self.ecran.blit(texte, (texte_x, texte_y))
+    
     def afficher(self, systeme: SystemeSolaire) -> None:
         """Affiche le système solaire.
         
@@ -182,6 +220,9 @@ class Visualisation:
         
         # Effacement de l'écran
         self.ecran.fill(self.NOIR)
+        
+        # Dessin de la grille
+        self.dessiner_grille(echelle)
         
         # Calcul de la date actuelle
         jours_entiers = int(self.temps_actuel)
