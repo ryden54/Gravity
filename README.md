@@ -1,45 +1,76 @@
 # Simulation du Système Solaire
 
-Ce projet est une simulation du système solaire permettant de visualiser les mouvements des planètes en 2D et 3D.
+Une simulation interactive du système solaire interne (jusqu'à Mars) utilisant Python et Pygame.
 
-## Fonctionnalités prévues
+## Pré-requis
 
-- Simulation précise des forces gravitationnelles
-- Visualisation 2D et 3D des trajectoires planétaires
-- Interface utilisateur pour contrôler les paramètres de la simulation
+- Python 3.8 ou supérieur
+- Pygame 2.6.1 ou supérieur
+- NumPy 1.24.0 ou supérieur
 
 ## Installation
 
-1. Cloner ce dépôt
-   ```bash
-   git clone [URL du dépôt]
-   cd simulation-systeme-solaire
-   ```
+1. Clonez le dépôt :
+```bash
+git clone https://github.com/votre-username/Gravity.git
+cd Gravity
+```
 
-2. Créer un environnement virtuel et l'activer
-   ```bash
-   python -m venv venv
-   
-   # Sur Windows
-   .\venv\Scripts\activate
-   
-   # Sur macOS/Linux
-   source venv/bin/activate
-   ```
+2. Créez un environnement virtuel et activez-le :
+```bash
+python -m venv venv
+# Sur Windows :
+venv\Scripts\activate
+# Sur Linux/Mac :
+source venv/bin/activate
+```
 
-3. Installer les dépendances
-   ```bash
-   pip install -r requirements.txt
-   ```
+3. Installez les dépendances :
+```bash
+pip install -r requirements.txt
+```
 
-## Utilisation
+## Lancement
 
-Instructions à venir quand le développement sera plus avancé.
+Pour lancer la simulation :
 
-## Structure du projet
+```bash
+# Sur Windows :
+$env:PYTHONPATH="."; python src/main.py
 
-Structure à venir quand le développement sera plus avancé.
+# Sur Linux/Mac :
+PYTHONPATH=. python src/main.py
+```
+
+### Options de lancement
+
+- `--dt` : Définit l'unité de temps de la simulation en heures (défaut : 24.0)
+  ```bash
+  python src/main.py --dt 12.0  # Simulation avec pas de temps de 12 heures
+  ```
+
+## Contrôles
+
+- `Échap` : Quitter la simulation
+- Redimensionnez la fenêtre à tout moment pour ajuster la vue
+
+## Fonctionnalités
+
+- Simulation réaliste des orbites des planètes jusqu'à Mars
+- Affichage des trajectoires des planètes
+- Grille de référence avec distances en UA
+- Date et heure en temps réel
+- Interface graphique interactive
 
 ## Licence
 
-Ce projet est sous licence [À définir]. 
+Ce projet est sous licence GNU General Public License v3.0 (GPL-3.0). Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à :
+1. Fork le projet
+2. Créer une branche pour votre fonctionnalité
+3. Commiter vos changements
+4. Pousser vers la branche
+5. Ouvrir une Pull Request 
