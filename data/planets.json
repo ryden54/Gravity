@@ -1,0 +1,78 @@
+{
+  "etoiles": [
+    {
+      "nom": "Soleil",
+      "masse": 1.989e30,
+      "rayon": 6.95e8,
+      "position": [0, 0, 0],
+      "vitesse": [0, 0, 0],
+      "couleur": [255, 255, 0]
+    }
+  ],
+  "planetes": [
+    {
+      "nom": "Mercure",
+      "masse": 3.3011e23,
+      "rayon": 2.4397e6,
+      "position": [5.7909e10, 0, 0],
+      "vitesse": [0, 4.7362e4, 0],
+      "couleur": [169, 169, 169]
+    },
+    {
+      "nom": "Venus",
+      "masse": 4.8675e24,
+      "rayon": 6.0518e6,
+      "position": [1.0821e11, 0, 0],
+      "vitesse": [0, 3.5020e4, 0],
+      "couleur": [255, 198, 73]
+    },
+    {
+      "nom": "Terre",
+      "masse": 5.9724e24,
+      "rayon": 6.3781e6,
+      "position": [1.4960e11, 0, 0],
+      "vitesse": [0, 2.9783e4, 0],
+      "couleur": [0, 0, 255]
+    },
+    {
+      "nom": "Mars",
+      "masse": 6.4171e23,
+      "rayon": 3.3962e6,
+      "position": [2.2794e11, 0, 0],
+      "vitesse": [0, 2.4077e4, 0],
+      "couleur": [255, 0, 0]
+    },
+    {
+      "nom": "Jupiter",
+      "masse": 1.8982e27,
+      "rayon": 7.1492e7,
+      "position": [7.7857e11, 0, 0],
+      "vitesse": [0, 1.3070e4, 0],
+      "couleur": [255, 140, 0]
+    },
+    {
+      "nom": "Saturne",
+      "masse": 5.6834e26,
+      "rayon": 6.0268e7,
+      "position": [1.4335e12, 0, 0],
+      "vitesse": [0, 9.6724e3, 0],
+      "couleur": [238, 221, 130]
+    },
+    {
+      "nom": "Uranus",
+      "masse": 8.6810e25,
+      "rayon": 2.5559e7,
+      "position": [2.8725e12, 0, 0],
+      "vitesse": [0, 6.8352e3, 0],
+      "couleur": [173, 216, 230]
+    },
+    {
+      "nom": "Neptune",
+      "masse": 1.0243e26,
+      "rayon": 2.4764e7,
+      "position": [4.4951e12, 0, 0],
+      "vitesse": [0, 5.4778e3, 0],
+      "couleur": [0, 0, 139]
+    }
+  ]
+} 
