@@ -40,7 +40,7 @@ class Visualisation:
         Returns:
             float: Échelle en pixels/mètre
         """
-        # Trouve les positions extrêmes
+        # Trouve les positions extrêmes actuelles
         x_min = y_min = float('inf')
         x_max = y_max = float('-inf')
         
@@ -51,19 +51,10 @@ class Visualisation:
             x_max = max(x_max, x)
             y_min = min(y_min, y)
             y_max = max(y_max, y)
-            
-            # Prend aussi en compte les trajectoires
-            if corps in self.trajectoires:
-                for position, _ in self.trajectoires[corps]:
-                    x, y = position[0], position[1]
-                    x_min = min(x_min, x)
-                    x_max = max(x_max, x)
-                    y_min = min(y_min, y)
-                    y_max = max(y_max, y)
         
-        # Ajoute une marge de 10% pour éviter que les planètes touchent les bords
-        marge_x = (x_max - x_min) * 0.1
-        marge_y = (y_max - y_min) * 0.1
+        # Ajoute une marge de sécurité de 20% pour éviter que les planètes touchent les bords
+        marge_x = (x_max - x_min) * 0.2
+        marge_y = (y_max - y_min) * 0.2
         x_min -= marge_x
         x_max += marge_x
         y_min -= marge_y
@@ -73,12 +64,57 @@ class Visualisation:
         largeur_necessaire = x_max - x_min
         hauteur_necessaire = y_max - y_min
         
-        # Calcule l'échelle pour chaque dimension
-        echelle_x = (self.largeur - 2 * self.marge) / largeur_necessaire if largeur_necessaire > 0 else 1e-10
-        echelle_y = (self.hauteur - 2 * self.marge) / hauteur_necessaire if hauteur_necessaire > 0 else 1e-10
+        # Zone d'affichage disponible (en tenant compte de la marge)
+        largeur_disponible = self.largeur - 2 * self.marge
+        hauteur_disponible = self.hauteur - 2 * self.marge
+        
+        # Calcule l'échelle pour chaque dimension en tenant compte des marges
+        echelle_x = largeur_disponible / largeur_necessaire if largeur_necessaire > 0 else 1e-10
+        echelle_y = hauteur_disponible / hauteur_necessaire if hauteur_necessaire > 0 else 1e-10
         
         # Utilise l'échelle la plus petite pour conserver les proportions
-        return min(echelle_x, echelle_y)
+        nouvelle_echelle = min(echelle_x, echelle_y)
+        
+        # Si c'est la première fois qu'on calcule l'échelle
+        if not hasattr(self, 'echelle_courante'):
+            self.echelle_courante = nouvelle_echelle
+            return nouvelle_echelle
+        
+        # Si la nouvelle échelle est plus petite (zoom out nécessaire)
+        if nouvelle_echelle < self.echelle_courante:
+            # Vérifie si un corps sort de la zone d'affichage avec l'échelle courante
+            corps_visible = True
+            for corps in systeme.obtenir_tous_corps():
+                x = corps.position[0] * self.echelle_courante + self.largeur / 2
+                y = corps.position[1] * self.echelle_courante + self.hauteur / 2
+                if (x < self.marge or x > self.largeur - self.marge or 
+                    y < self.marge or y > self.hauteur - self.marge):
+                    corps_visible = False
+                    break
+            
+            # Si un corps n'est plus visible, on applique la nouvelle échelle
+            if not corps_visible:
+                self.echelle_courante = nouvelle_echelle
+        
+        # Si la nouvelle échelle est plus grande (zoom in possible)
+        elif nouvelle_echelle > self.echelle_courante * 2:
+            # Vérifie si tous les corps sont dans la moitié centrale de la zone d'affichage
+            tous_proches = True
+            zone_centrale_x = largeur_disponible / 4  # 25% de la largeur de chaque côté
+            zone_centrale_y = hauteur_disponible / 4  # 25% de la hauteur de chaque côté
+            
+            for corps in systeme.obtenir_tous_corps():
+                x = corps.position[0] * self.echelle_courante
+                y = corps.position[1] * self.echelle_courante
+                if (abs(x) > zone_centrale_x or abs(y) > zone_centrale_y):
+                    tous_proches = False
+                    break
+            
+            # Si tous les corps sont proches, on augmente progressivement l'échelle
+            if tous_proches:
+                self.echelle_courante = self.echelle_courante * 1.1  # Augmente de 10% à chaque fois
+        
+        return self.echelle_courante
     
     def convertir_coordonnees(self, position: np.ndarray, echelle: float) -> Tuple[int, int]:
         """Convertit des coordonnées du monde réel en coordonnées d'écran.
